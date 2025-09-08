@@ -26,18 +26,8 @@ export default defineConfig({
   server: {
     host: true, // Allow external connections
     port: 5173,
-    allowedHosts: [
-      '1181e984e5cc.ngrok-free.app',
-      'e3383d339754.ngrok-free.app',
-      'f27afbb38011.ngrok-free.app',
-      'localhost',
-      '.ngrok-free.app' // Allow all ngrok subdomains
-    ],
     hmr: {
       overlay: false // Remove HMR warnings from overlay
-    },
-    headers: {
-      'ngrok-skip-browser-warning': 'true'
     }
   }
 })
