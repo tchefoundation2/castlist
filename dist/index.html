@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Castlist</title>
+    
+    <!-- Content Security Policy - Simplified for Farcaster Mini Apps -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:;
+      style-src 'self' 'unsafe-inline' https:;
+      font-src 'self' https:;
+      img-src 'self' data: https: blob:;
+      connect-src 'self' https: wss: data:;
+      frame-src 'self' https:;
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+      worker-src 'self' blob:;
+      child-src 'self' blob:;
+    " />
+    
+    <!-- Farcaster Mini App Embed Tags -->
+    <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://castlist.netlify.app/farcaster-white.svg","button":{"title":"Open Castlist","action":{"type":"launch_frame","name":"Castlist","url":"https://castlist.netlify.app","splashImageUrl":"https://castlist.netlify.app/farcaster-white.svg","splashBackgroundColor":"#8A63D2"}}}' />
+    
+    <!-- Open Graph Meta Tags for better embed detection -->
+    <meta property="og:title" content="Castlist" />
+    <meta property="og:description" content="Transform your Readings into a Social Journey" />
+    <meta property="og:image" content="https://castlist.netlify.app/farcaster-white.svg" />
+    <meta property="og:url" content="https://castlist.netlify.app" />
+    <meta property="og:type" content="website" />
+    <!-- Farcaster SDK - Smart Detection -->
+    <script type="module" src="/farcaster-sdk.js"></script>
+    <script type="module" crossorigin src="/assets/index-BwrObbWo.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CWb8HkUS.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

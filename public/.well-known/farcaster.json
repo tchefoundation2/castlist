@@ -1,0 +1,33 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjExODM2MTAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg3NjAyNjViMUU5ZTlDNTQ4ZGQ4YTIzMzY1OTVCMGU5QkM3MzAyRkI0In0",
+    "payload": "eyJkb21haW4iOiJjYXN0bGlzdC5uZXRsaWZ5LmFwcCJ9",
+    "signature": "MHhmZDU2YzM5ODllOWY5NTQ2MDQwNzJiYzBlNzIwMWQ3ZjQ4ODliMDFiNjlmMTI2MjM5OWZjZjc4NjdhOWI2M2I5MDU5ZmIyMzA2MmMzNDZiNjcwZjNkMzdjNmMzYTE4YmQxMzg3ZjA5M2I0NTIwY2MyODZmMmZlZDRiNTcwOThjYzFj"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Castlist",
+    "iconUrl": "https://castlist.netlify.app/farcaster-white.svg",
+    "homeUrl": "https://castlist.netlify.app",
+    "imageUrl": "https://castlist.netlify.app/farcaster-white.svg",
+    "aspectRatio": "1:1",
+    "buttonTitle": "Open Castlist",
+    "splashImageUrl": "https://castlist.netlify.app/farcaster-white.svg",
+    "splashBackgroundColor": "#8A63D2",
+    "webhookUrl": "https://castlist.netlify.app/api/webhook",
+    "description": "Transform your Readings into a Social Journey",
+    "subtitle": "Share reading lists",
+    "tagline": "Reading lists, shared",
+    "primaryCategory": "social",
+    "tags": ["books", "reading", "social", "curation", "lists"],
+    "heroImageUrl": "https://castlist.netlify.app/farcaster-white.svg",
+    "screenshotUrls": [
+      "https://castlist.netlify.app/screenshot1.png",
+      "https://castlist.netlify.app/screenshot2.png"
+    ],
+    "ogTitle": "Castlist - Reading Lists",
+    "ogDescription": "Create and share curated reading lists with the Farcaster community",
+    "ogImageUrl": "https://castlist.netlify.app/farcaster-white.svg",
+    "castShareUrl": "https://castlist.netlify.app/share"
+  }
+}
