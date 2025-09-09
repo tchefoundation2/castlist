@@ -1,5 +1,5 @@
 /*
-  Content-Security-Policy: frame-ancestors 'self' https://farcaster.xyz https://*.farcaster.xyz https://warpcast.com https://*.warpcast.com https://client.warpcast.com;
+  Content-Security-Policy: frame-ancestors 'self' https://farcaster.xyz https://*.farcaster.xyz https://warpcast.com https://*.warpcast.com https://client.warpcast.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://esm.sh https://explorer-api.walletconnect.com https://www.googletagmanager.com; connect-src 'self' https://*.farcaster.xyz https://*.warpcast.com https://explorer-api.walletconnect.com https://www.googletagmanager.com;
   Access-Control-Allow-Origin: *
 
 /.well-known/farcaster.json
