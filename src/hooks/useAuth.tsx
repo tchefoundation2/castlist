@@ -142,19 +142,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           console.warn("Farcaster SDK not found. Showing splash screen only.");
         }
         
-        // Add a timeout to prevent infinite loading
-        setTimeout(() => {
-          if (isLoading) {
-            console.warn("⚠️ Authentication timeout - stopping loading");
-            setIsLoading(false);
-          }
-        }, 10000); // 10 second timeout
       } catch (e) {
         console.error("Error checking Farcaster session:", e);
       } finally {
         console.log("🔍 Authentication check complete, setting loading to false");
         setIsLoading(false);
       }
+      
+      // Add a timeout as backup to prevent infinite loading
+      setTimeout(() => {
+        console.warn("⚠️ Backup timeout - forcing loading to false");
+        setIsLoading(false);
+      }, 15000); // 15 second backup timeout
     };
     checkFarcasterSession();
   }, []);

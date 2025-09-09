@@ -26,7 +26,7 @@ const AppContent: React.FC = () => {
   const { isLoaded: isSDKLoaded, isReady: isSDKReady, hasActions } = useFarcasterSDKSimple();
   
   // Check if we're in a Farcaster mini app environment
-  const isMiniApp = window.farcaster && window.farcaster.actions && typeof window.farcaster.signIn === 'function';
+  const isMiniApp = window.farcaster && (window.farcaster.actions || window.farcaster.quickAuth);
   
   // Debug logs
   console.log("🔍 App.tsx - Environment detection:");
