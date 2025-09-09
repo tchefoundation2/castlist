@@ -26,55 +26,65 @@ const initializeFarcaster = async () => {
       console.log("✅ Farcaster SDK made available globally");
       console.log("✅ Available methods:", Object.keys(window.farcaster));
       console.log("✅ SDK object:", window.farcaster);
-      console.log("✅ getUser function:", typeof window.farcaster.getUser);
-      console.log("✅ signIn function:", typeof window.farcaster.signIn);
       console.log("✅ quickAuth:", !!window.farcaster.quickAuth);
       console.log("✅ actions:", !!window.farcaster.actions);
+      console.log("✅ context:", !!window.farcaster.context);
+      console.log("✅ wallet:", !!window.farcaster.wallet);
       
-      // Try to access functions directly from the SDK
-      console.log("🔍 Checking SDK methods directly:");
-      console.log("  - sdk.getUser:", typeof sdk.getUser);
-      console.log("  - sdk.signIn:", typeof sdk.signIn);
-      console.log("  - sdk.quickAuth:", !!sdk.quickAuth);
-      console.log("  - sdk.actions:", !!sdk.actions);
+      // SDK v2 uses different API - let's implement the correct methods
+      console.log("🔧 Implementing v2 API methods...");
       
-      // If functions are not available, try to access them differently
-      if (typeof window.farcaster.getUser !== 'function') {
-        console.log("🔧 Attempting to access getUser from different paths...");
-        console.log("  - sdk.user?.getUser:", typeof sdk.user?.getUser);
-        console.log("  - sdk.auth?.getUser:", typeof sdk.auth?.getUser);
-        console.log("  - sdk.client?.getUser:", typeof sdk.client?.getUser);
-        
-        // Try to find getUser in nested objects
-        if (sdk.user?.getUser) {
-          window.farcaster.getUser = sdk.user.getUser;
-          console.log("✅ Found getUser in sdk.user");
-        } else if (sdk.auth?.getUser) {
-          window.farcaster.getUser = sdk.auth.getUser;
-          console.log("✅ Found getUser in sdk.auth");
-        } else if (sdk.client?.getUser) {
-          window.farcaster.getUser = sdk.client.getUser;
-          console.log("✅ Found getUser in sdk.client");
-        }
+      // Create getUser function using context
+      if (window.farcaster.context) {
+        window.farcaster.getUser = async () => {
+          try {
+            console.log("🔍 Getting user from context...");
+            const context = await window.farcaster.context.get();
+            console.log("✅ Context received:", context);
+            
+            if (context && context.user) {
+              return {
+                fid: context.user.fid,
+                username: context.user.username,
+                pfp_url: context.user.pfp_url
+              };
+            }
+            return null;
+          } catch (error) {
+            console.error("❌ Error getting user from context:", error);
+            return null;
+          }
+        };
+        console.log("✅ getUser function implemented using context");
       }
       
-      if (typeof window.farcaster.signIn !== 'function') {
-        console.log("🔧 Attempting to access signIn from different paths...");
-        console.log("  - sdk.user?.signIn:", typeof sdk.user?.signIn);
-        console.log("  - sdk.auth?.signIn:", typeof sdk.auth?.signIn);
-        console.log("  - sdk.client?.signIn:", typeof sdk.client?.signIn);
-        
-        // Try to find signIn in nested objects
-        if (sdk.user?.signIn) {
-          window.farcaster.signIn = sdk.user.signIn;
-          console.log("✅ Found signIn in sdk.user");
-        } else if (sdk.auth?.signIn) {
-          window.farcaster.signIn = sdk.auth.signIn;
-          console.log("✅ Found signIn in sdk.auth");
-        } else if (sdk.client?.signIn) {
-          window.farcaster.signIn = sdk.client.signIn;
-          console.log("✅ Found signIn in sdk.client");
-        }
+      // Create signIn function using quickAuth
+      if (window.farcaster.quickAuth) {
+        window.farcaster.signIn = async () => {
+          try {
+            console.log("🔍 Signing in using quickAuth...");
+            const token = await window.farcaster.quickAuth.getToken();
+            console.log("✅ QuickAuth token received:", token);
+            
+            // After getting token, get user info
+            const user = await window.farcaster.getUser();
+            if (user) {
+              return {
+                fid: user.fid,
+                username: user.username,
+                pfp_url: user.pfp_url,
+                message: "Signed in successfully",
+                signature: "quickAuth",
+                nonce: "quickAuth"
+              };
+            }
+            return { error: "Failed to get user after sign in" };
+          } catch (error) {
+            console.error("❌ Error signing in:", error);
+            return { error: error.message };
+          }
+        };
+        console.log("✅ signIn function implemented using quickAuth");
       }
       
       console.log("🔍 Final check:");
