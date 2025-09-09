@@ -83,6 +83,31 @@ const OfficialFarcasterAuth: React.FC = () => {
           // Import SDK and try to authenticate
           const { sdk } = await import('@farcaster/miniapp-sdk');
           
+          // Try addMiniApp first (this is the correct method for mini-apps)
+          if (sdk && sdk.actions && typeof sdk.actions.addMiniApp === 'function') {
+            console.log("🔍 Using sdk.actions.addMiniApp()...");
+            const result = await sdk.actions.addMiniApp();
+            console.log("✅ Farcaster addMiniApp result:", result);
+            
+            // After addMiniApp, try to get user info
+            if (sdk.actions.getUser) {
+              const userInfo = await sdk.actions.getUser();
+              console.log("✅ Farcaster user info:", userInfo);
+              
+              if (userInfo && 'fid' in userInfo) {
+                const user = {
+                  id: userInfo.fid.toString(),
+                  fid: userInfo.fid,
+                  username: userInfo.username || 'unknown',
+                  pfp_url: userInfo.pfp_url || '',
+                  email: `${userInfo.username}@farcaster.xyz`
+                };
+                loginAsMockUser(user);
+                return;
+              }
+            }
+          }
+          
           // Check if we have signIn method (it might be in actions)
           if (sdk && sdk.actions && typeof (sdk.actions as any).signIn === 'function') {
             console.log("🔍 Using sdk.actions.signIn()...");
