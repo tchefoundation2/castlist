@@ -46,7 +46,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Check for an existing Farcaster session when the app loads
   useEffect(() => {
     const checkFarcasterSession = async () => {
+      console.log("🔍 Starting authentication check...");
       setIsLoading(true);
+      
+      // Wait a bit to see if SDK loads
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       try {
         // Check if we're in a Farcaster mini app environment
         const isMiniApp = window.farcaster && window.farcaster.actions && window.farcaster.actions.ready;
@@ -115,6 +120,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } catch (e) {
         console.error("Error checking Farcaster session:", e);
       } finally {
+        console.log("🔍 Authentication check complete, setting loading to false");
         setIsLoading(false);
       }
     };
