@@ -47,11 +47,6 @@
       ]
     }
   ],
-  "functions": {
-    ".well-known/farcaster.json": {
-      "maxDuration": 10
-    }
-  },
   "rewrites": [
     {
       "source": "/.well-known/farcaster.json",
