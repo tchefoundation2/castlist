@@ -85,7 +85,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             console.error("❌ Error getting context:", contextError);
           }
         } else {
-          console.log("ℹ️ Not in Mini App environment - running standalone");
+          console.log("🌐 Web browser detected - QR code authentication needed");
+          console.log("ℹ️ User needs to scan QR code with Farcaster mobile app");
+          console.log("ℹ️ This is normal behavior for web browsers");
         }
         
       } catch (e) {

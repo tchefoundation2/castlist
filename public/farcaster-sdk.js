@@ -39,27 +39,36 @@ const initializeFarcaster = async () => {
       try {
         const isInMiniApp = await sdk.isInMiniApp();
         console.log("✅ Is in Mini App:", isInMiniApp);
+        
+        if (isInMiniApp) {
+          // We're in a Mini App - get user context directly
+          console.log("📱 In Mini App - getting user context");
+          try {
+            const context = await sdk.context.get();
+            console.log("✅ Context:", context);
+            
+            if (context && context.user) {
+              console.log("✅ User found in context:", context.user);
+              window.farcasterUser = context.user;
+            }
+          } catch (e) {
+            console.log("⚠️ Could not get context:", e);
+          }
+        } else {
+          // We're in web browser - need QR code authentication
+          console.log("🌐 In web browser - QR code authentication needed");
+          console.log("ℹ️ User needs to scan QR code with Farcaster mobile app");
+        }
+        
+        // Signal that the app is ready
+        console.log("🚀 Calling sdk.actions.ready()...");
+        sdk.actions.ready();
+        console.log("✅ App is ready!");
+        
       } catch (e) {
         console.log("⚠️ Could not check isInMiniApp:", e);
-      }
-      
-      // Signal that the app is ready FIRST
-      console.log("🚀 Calling sdk.actions.ready()...");
-      sdk.actions.ready();
-      console.log("✅ App is ready!");
-      
-      // Get context (user info) AFTER ready
-      try {
-        const context = await sdk.context.get();
-        console.log("✅ Context:", context);
-        
-        if (context && context.user) {
-          console.log("✅ User found in context:", context.user);
-          // Store user info globally for easy access
-          window.farcasterUser = context.user;
-        }
-      } catch (e) {
-        console.log("⚠️ Could not get context:", e);
+        // Still call ready even if check fails
+        sdk.actions.ready();
       }
       
     } else {
