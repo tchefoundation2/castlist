@@ -39,8 +39,23 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=3600"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
         }
       ]
+    }
+  ],
+  "functions": {
+    ".well-known/farcaster.json": {
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/.well-known/farcaster.json",
+      "destination": "/farcaster.json"
     }
   ]
 }

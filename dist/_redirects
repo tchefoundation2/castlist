@@ -1,12 +1,1 @@
-# Redirect all requests to index.html for SPA routing
-/*    /index.html   200
-
-# Test endpoint
-/api/test  /api/test.js  200
-
-# Webhook endpoint
-/api/webhook  /api/webhook.js  200
-
-# CORS headers for Farcaster
-/api/*  https://client.farcaster.xyz/api/:splat  200
-/v2/*   https://client.farcaster.xyz/v2/:splat   200
+/.well-known/farcaster.json /farcaster.json 200
