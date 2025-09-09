@@ -1,24 +1,40 @@
-console.log("🚀 Farcaster SDK Helper - Simplified Version");
+console.log("🚀 Farcaster SDK Helper - Real SDK Version");
 
-// Simple detection and ready() call
-const initializeFarcaster = () => {
+// Import and initialize the real Farcaster SDK
+import { sdk } from "https://esm.sh/@farcaster/frame-sdk";
+
+const initializeFarcaster = async () => {
   console.log("🔍 Environment check:");
   console.log("  - Location:", window.location.href);
   console.log("  - In iframe:", window !== window.top);
   console.log("  - Referrer:", document.referrer);
   console.log("  - window.farcaster:", !!window.farcaster);
   
-  // If Farcaster SDK is already injected, call ready()
-  if (window.farcaster && window.farcaster.actions && window.farcaster.actions.ready) {
-    try {
-      console.log("✅ Calling window.farcaster.actions.ready()...");
-      window.farcaster.actions.ready();
-      console.log("✅ Ready called successfully");
-    } catch (error) {
-      console.warn("⚠️ Error calling ready():", error);
+  try {
+    // Initialize the real Farcaster SDK
+    console.log("🔧 Initializing real Farcaster SDK...");
+    
+    // Check if we're in a Farcaster environment
+    if (window !== window.top || document.referrer.includes('farcaster.xyz')) {
+      console.log("📱 Farcaster environment detected");
+      
+      // Call ready() to signal the app is ready
+      sdk.actions.ready();
+      console.log("✅ Real Farcaster SDK ready() called successfully");
+      
+      // Make SDK available globally
+      window.farcaster = {
+        signIn: sdk.signIn,
+        getUser: sdk.getUser,
+        actions: sdk.actions,
+        quickAuth: sdk.quickAuth
+      };
+      console.log("✅ Farcaster SDK made available globally");
+    } else {
+      console.log("ℹ️ Not in Farcaster environment - SDK not initialized");
     }
-  } else {
-    console.log("ℹ️ No Farcaster SDK detected - component will handle initialization");
+  } catch (error) {
+    console.error("❌ Error initializing Farcaster SDK:", error);
   }
 };
 
