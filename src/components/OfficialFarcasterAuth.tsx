@@ -19,6 +19,13 @@ const OfficialFarcasterAuth: React.FC = () => {
         setSdkLoaded(true);
         
         console.log("✅ Farcaster SDK loaded:", sdk);
+        console.log("🔍 SDK structure:", {
+          hasActions: !!sdk.actions,
+          actionsKeys: sdk.actions ? Object.keys(sdk.actions) : [],
+          hasWallet: !!sdk.wallet,
+          walletKeys: sdk.wallet ? Object.keys(sdk.wallet) : [],
+          allKeys: Object.keys(sdk)
+        });
         
         // Call ready() to hide splash screen
         await sdk.actions.ready();
