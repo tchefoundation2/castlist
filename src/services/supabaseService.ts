@@ -4,9 +4,9 @@ import { MOCK_GUIDES } from './mockData';
 import { getFarcasterUser } from './farcasterService';
 
 // Keep the Supabase client initialized for data operations.
-// Try Netlify environment variables first, then Vite variables, then fallback
-const SUPABASE_URL = import.meta.env.SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL || 'https://rygpuqnqaagihwoapdix.supabase.co';
-const SUPABASE_ANON_KEY = import.meta.env.SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5Z3B1cW5xYWFnaWh3b2FwZGl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTczMDU5MDAsImV4cCI6MjA3Mjg4MTkwMH0.DxkNHZ7duGlAYR03GEPPsMaHGK9UPdgUT5fo--eZhGQ';
+// Try Vercel environment variables first, then Vite variables, then fallback
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL || 'https://rygpuqnqaagihwoapdix.supabase.co';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5Z3B1cW5xYWFnaWh3b2FwZGl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTczMDU5MDAsImV4cCI6MjA3Mjg4MTkwMH0.DxkNHZ7duGlAYR03GEPPsMaHGK9UPdgUT5fo--eZhGQ';
 
 console.log('🔧 Supabase configuration:', {
   url: SUPABASE_URL,
@@ -23,17 +23,9 @@ export default supabase;
 
 
 export const getOrCreateUserProfile = async (farcasterUser: { fid: number; username: string; pfp_url: string }): Promise<User> => {
-  // 1. First, try to get fresh data from Farcaster API
-  let farcasterData = null;
-  try {
-    farcasterData = await getFarcasterUser(farcasterUser.fid);
-    console.log("Fetched fresh Farcaster data:", farcasterData);
-  } catch (error) {
-    console.warn("Could not fetch fresh Farcaster data, using provided data:", error);
-  }
-
-  // Use fresh data if available, otherwise fall back to provided data
-  const userData = farcasterData || farcasterUser;
+  // Skip Farcaster API call due to CORS issues - use provided data directly
+  console.log("Using provided Farcaster data directly:", farcasterUser);
+  const userData = farcasterUser;
 
   // 2. Check if user with this FID exists in our database
   const { data: existingProfile, error: selectError } = await supabase
@@ -48,25 +40,7 @@ export const getOrCreateUserProfile = async (farcasterUser: { fid: number; usern
   }
 
   if (existingProfile) {
-    // Update with fresh Farcaster data if available
-    if (farcasterData) {
-      const { data: updatedProfile, error: updateError } = await supabase
-        .from('profiles')
-        .update({ 
-          username: farcasterData.username,
-          pfp_url: farcasterData.pfp_url,
-          updated_at: new Date().toISOString()
-        })
-        .eq('fid', userData.fid)
-        .select()
-        .single();
-      
-      if (updateError) {
-          console.error("Error updating profile:", updateError);
-          return existingProfile; // return old profile on failure
-      }
-      return updatedProfile;
-    }
+    console.log("✅ User profile found:", existingProfile);
     return existingProfile;
   }
 
