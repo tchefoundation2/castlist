@@ -82,100 +82,80 @@ const OfficialFarcasterAuth: React.FC = () => {
     setError(null);
 
     try {
-      console.log("🔍 Starting Farcaster authentication...");
-      console.log("🔍 Debug info:", debugInfo);
-
-      // Try to use the real Farcaster authentication
+      console.log("🔍 Starting Farcaster Mini-App authentication...");
+      
       if (sdkLoaded) {
         try {
-          console.log("🔍 Attempting Farcaster authentication...");
-          
           // Import SDK and try to authenticate
           const { sdk } = await import('@farcaster/miniapp-sdk');
           
-          // Try addMiniApp first (this is the correct method for mini-apps)
-          if (sdk && sdk.actions && typeof sdk.actions.addMiniApp === 'function') {
-            console.log("🔍 Using sdk.actions.addMiniApp()...");
-            const result = await sdk.actions.addMiniApp();
-            console.log("✅ Farcaster addMiniApp result:", result);
-            
-            // After addMiniApp, try to get user info
-            if (sdk.actions.getUser) {
-              const userInfo = await sdk.actions.getUser();
-              console.log("✅ Farcaster user info:", userInfo);
-              
-              if (userInfo && 'fid' in userInfo) {
-                const user = {
-                  id: userInfo.fid.toString(),
-                  fid: userInfo.fid,
-                  username: userInfo.username || 'unknown',
-                  pfp_url: userInfo.pfp_url || '',
-                  email: `${userInfo.username}@farcaster.xyz`
-                };
-                loginAsMockUser(user);
-                return;
-              }
-            }
-          }
+          console.log("🔍 Available SDK methods:", {
+            actions: sdk.actions ? Object.keys(sdk.actions) : [],
+            wallet: sdk.wallet ? Object.keys(sdk.wallet) : [],
+            all: Object.keys(sdk)
+          });
           
-          // Check if we have signIn method (it might be in actions)
-          if (sdk && sdk.actions && typeof (sdk.actions as any).signIn === 'function') {
-            console.log("🔍 Using sdk.actions.signIn()...");
-            const result = await (sdk.actions as any).signIn();
-            console.log("✅ Farcaster authentication result:", result);
+          // Try to get user info directly (mini-app should have user context)
+          if (sdk.actions && typeof sdk.actions.getUser === 'function') {
+            console.log("🔍 Trying sdk.actions.getUser()...");
+            const userInfo = await sdk.actions.getUser();
+            console.log("✅ Farcaster user info:", userInfo);
             
-            if (result && 'fid' in result) {
-              // Success - convert to our user format
+            if (userInfo && 'fid' in userInfo) {
               const user = {
-                id: result.fid.toString(),
-                fid: result.fid,
-                username: result.username || 'unknown',
-                pfp_url: result.pfp_url || '',
-                email: `${result.username}@farcaster.xyz`
+                id: userInfo.fid.toString(),
+                fid: userInfo.fid,
+                username: userInfo.username || 'unknown',
+                pfp_url: userInfo.pfp_url || '',
+                email: `${userInfo.username}@farcaster.xyz`
               };
-              loginAsMockUser(user);
-              return;
-            }
-          } else if (window.farcaster && typeof window.farcaster.signIn === 'function') {
-            console.log("🔍 Using window.farcaster.signIn()...");
-            const result = await window.farcaster.signIn();
-            console.log("✅ Farcaster authentication result:", result);
-            
-            if (result && 'fid' in result) {
-              // Success - convert to our user format
-              const user = {
-                id: result.fid.toString(),
-                fid: result.fid,
-                username: result.username || 'unknown',
-                pfp_url: result.pfp_url || '',
-                email: `${result.username}@farcaster.xyz`
-              };
+              console.log("✅ Mini-app user login successful:", user);
               loginAsMockUser(user);
               return;
             }
           }
           
-          console.log("⚠️ No signIn method available, using mock user");
+          // Try other possible user methods
+          if (sdk.actions && typeof sdk.actions.getCurrentUser === 'function') {
+            console.log("🔍 Trying sdk.actions.getCurrentUser()...");
+            const userInfo = await sdk.actions.getCurrentUser();
+            console.log("✅ Farcaster current user:", userInfo);
+            
+            if (userInfo && 'fid' in userInfo) {
+              const user = {
+                id: userInfo.fid.toString(),
+                fid: userInfo.fid,
+                username: userInfo.username || 'unknown',
+                pfp_url: userInfo.pfp_url || '',
+                email: `${userInfo.username}@farcaster.xyz`
+              };
+              console.log("✅ Mini-app current user login successful:", user);
+              loginAsMockUser(user);
+              return;
+            }
+          }
+          
+          console.log("⚠️ No user methods available in mini-app context");
           
         } catch (authError) {
-          console.warn("⚠️ Farcaster authentication failed:", authError);
-          setError(`Authentication Error: ${authError instanceof Error ? authError.message : 'Unknown error'}`);
+          console.warn("⚠️ Farcaster mini-app authentication failed:", authError);
+          setError(`Mini-app Auth Error: ${authError instanceof Error ? authError.message : 'Unknown error'}`);
         }
       }
 
-      // Fallback to mock user
-      console.log("🔍 Using mock user fallback");
+      // Fallback to mock user for mini-app
+      console.log("🔍 Using mock user for mini-app fallback");
       loginAsMockUser({
         id: '12345',
         fid: 12345,
-        username: 'preview_user',
+        username: 'mini_app_user',
         pfp_url: 'https://i.imgur.com/34Iodlt.jpg',
-        email: 'preview_user@farcaster.xyz'
+        email: 'mini_app_user@farcaster.xyz'
       });
       
     } catch (err) {
-      console.error("❌ Authentication error:", err);
-      setError(err instanceof Error ? err.message : 'Authentication failed');
+      console.error("❌ Mini-app authentication error:", err);
+      setError(err instanceof Error ? err.message : 'Mini-app authentication failed');
     } finally {
       setIsLoading(false);
     }
