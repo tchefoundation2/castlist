@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(true);
       try {
         // Check if we're in a Farcaster mini app environment
-        const isMiniApp = window.farcaster && window.farcaster.actions;
+        const isMiniApp = window.farcaster && window.farcaster.actions && window.farcaster.actions.ready;
         
         console.log("🔍 Environment detection:");
         console.log("  - isMiniApp:", isMiniApp);
@@ -57,12 +57,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         if (isMiniApp && window.farcaster) {
           console.log("📱 Mini App environment detected - using Quick Auth");
-          
-          // Call sdk.actions.ready() to hide splash screen
-          if (window.farcaster.actions?.ready) {
-            window.farcaster.actions.ready();
-            console.log("✅ Called sdk.actions.ready()");
-          }
           
           // Use Quick Auth for automatic authentication
           if (window.farcaster.quickAuth?.getToken) {
@@ -77,6 +71,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 console.log("✅ User info received:", farcasterUser);
                 const profile = await getOrCreateUserProfile(farcasterUser);
                 setUser(profile);
+                
+                // Call ready() AFTER successful authentication
+                if (window.farcaster.actions?.ready) {
+                  window.farcaster.actions.ready();
+                  console.log("✅ Called sdk.actions.ready() after auth");
+                }
               }
             } catch (quickAuthError) {
               console.warn("⚠️ Quick Auth failed, falling back to manual auth:", quickAuthError);
@@ -85,6 +85,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               if (farcasterUser) {
                 const profile = await getOrCreateUserProfile(farcasterUser);
                 setUser(profile);
+                
+                // Call ready() AFTER successful authentication
+                if (window.farcaster.actions?.ready) {
+                  window.farcaster.actions.ready();
+                  console.log("✅ Called sdk.actions.ready() after fallback auth");
+                }
               }
             }
           } else {
@@ -94,6 +100,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (farcasterUser) {
               const profile = await getOrCreateUserProfile(farcasterUser);
               setUser(profile);
+              
+              // Call ready() AFTER successful authentication
+              if (window.farcaster.actions?.ready) {
+                window.farcaster.actions.ready();
+                console.log("✅ Called sdk.actions.ready() after manual auth");
+              }
             }
           }
         } else {
@@ -107,6 +119,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             email: 'dev@example.com'
           };
           setUser(mockUser);
+          
+          // Call ready() even in development mode if SDK is available
+          if (window.farcaster?.actions?.ready) {
+            window.farcaster.actions.ready();
+            console.log("✅ Called sdk.actions.ready() in development mode");
+          }
         }
       } catch (e) {
         console.error("Error checking Farcaster session:", e);
@@ -119,6 +137,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           email: 'dev@example.com'
         };
         setUser(mockUser);
+        
+        // Call ready() even in error case if SDK is available
+        if (window.farcaster?.actions?.ready) {
+          window.farcaster.actions.ready();
+          console.log("✅ Called sdk.actions.ready() in error case");
+        }
       } finally {
         setIsLoading(false);
       }
