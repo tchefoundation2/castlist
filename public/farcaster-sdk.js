@@ -43,7 +43,12 @@ const initializeFarcaster = async () => {
         console.log("⚠️ Could not check isInMiniApp:", e);
       }
       
-      // Get context (user info)
+      // Signal that the app is ready FIRST
+      console.log("🚀 Calling sdk.actions.ready()...");
+      sdk.actions.ready();
+      console.log("✅ App is ready!");
+      
+      // Get context (user info) AFTER ready
       try {
         const context = await sdk.context.get();
         console.log("✅ Context:", context);
@@ -56,11 +61,6 @@ const initializeFarcaster = async () => {
       } catch (e) {
         console.log("⚠️ Could not get context:", e);
       }
-      
-      // Signal that the app is ready
-      console.log("🚀 Calling sdk.actions.ready()...");
-      await sdk.actions.ready();
-      console.log("✅ App is ready!");
       
     } else {
       console.log("ℹ️ Not in Farcaster environment - running standalone");
