@@ -1,33 +1,17 @@
 {
-  "name": "Castlist",
-  "description": "Transform your Readings into a Social Journey",
-  "icon": "https://castlisttest.vercel.app/farcaster-white.svg",
-  "splash": {
-    "icon": "https://castlisttest.vercel.app/farcaster-white.svg",
-    "background": "#8A63D2"
-  },
-  "screenshots": [
-    {
-      "url": "https://castlisttest.vercel.app/screenshot1.png",
-      "alt": "Castlist Home Screen"
-    },
-    {
-      "url": "https://castlisttest.vercel.app/screenshot2.png", 
-      "alt": "Castlist Guide Creation"
-    }
-  ],
-  "permissions": [
-    "user:read",
-    "user:write"
-  ],
-  "version": "2.0.0",
-  "developer": {
-    "name": "Castlist Team",
-    "url": "https://castlisttest.vercel.app"
-  },
   "accountAssociation": {
     "header": "eyJmaWQiOjExODM2MTAsInR5cGUiOiJhdXRoIiwia2V5IjoiMHg3NEZiNzMzODA0NzMwZDVkOEM2ZUEwNDRmYWUzZTVkNjY2MzY2ODI3In0",
     "payload": "eyJkb21haW4iOiJjYXN0bGlzdHRlc3QudmVyY2VsLmFwcCJ9",
     "signature": "Piy5+ObxTJd9d1XWuEobYqT873GbFS3oVwTfJeBiu3NbsnQ+VJ+L6cyWEQQzvi8fgp2+vkwPiOD4FbbzF8Ra7Bs="
+  },
+  "frame": {
+    "version": "1",
+    "name": "Castlist",
+    "iconUrl": "https://castlisttest.vercel.app/farcaster-white.svg",
+    "homeUrl": "https://castlisttest.vercel.app",
+    "imageUrl": "https://castlisttest.vercel.app/farcaster-white.svg",
+    "buttonTitle": "Open Castlist",
+    "splashImageUrl": "https://castlisttest.vercel.app/farcaster-white.svg",
+    "splashBackgroundColor": "#8A63D2"
   }
 }
