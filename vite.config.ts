@@ -16,8 +16,20 @@ export default defineConfig({
             join(__dirname, 'dist', 'farcaster-sdk.js')
           )
           console.log('✅ farcaster-sdk.js copied to dist')
+          
+          copyFileSync(
+             join(__dirname, 'public', 'farcaster-eth-provider-fix.js'),
+             join(__dirname, 'dist', 'farcaster-eth-provider-fix.js')
+           )
+           console.log('✅ farcaster-eth-provider-fix.js copied to dist')
+           
+           copyFileSync(
+             join(__dirname, 'public', 'farcaster-sdk-fallback.js'),
+             join(__dirname, 'dist', 'farcaster-sdk-fallback.js')
+           )
+           console.log('✅ farcaster-sdk-fallback.js copied to dist')
         } catch (error) {
-          console.error('❌ Failed to copy farcaster-sdk.js:', error)
+          console.error('❌ Failed to copy files:', error)
         }
       }
     }

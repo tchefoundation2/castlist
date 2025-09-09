@@ -60,6 +60,17 @@ export const useFarcasterSDKSimple = (): FarcasterSDKInfo => {
         console.log("⚠️ SDK not ready yet or actions not available");
       }
     };
+    
+    // Handle fallback event
+    const handleFallback = () => {
+      console.log("⚠️ Farcaster SDK fallback triggered");
+      // Even with fallback, we consider the SDK as loaded
+      setSdkInfo({
+        isLoaded: true,
+        isReady: true,
+        hasActions: true
+      });
+    };
 
     // Check immediately
     checkSDK();
@@ -69,10 +80,13 @@ export const useFarcasterSDKSimple = (): FarcasterSDKInfo => {
       setTimeout(checkSDK, 100);
     };
 
+    // Add event listeners
     window.addEventListener('load', handleLoad);
+    window.addEventListener('farcaster-sdk-fallback', handleFallback);
     
     return () => {
       window.removeEventListener('load', handleLoad);
+      window.removeEventListener('farcaster-sdk-fallback', handleFallback);
     };
   }, []);
 

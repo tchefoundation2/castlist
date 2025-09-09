@@ -3,6 +3,9 @@
 
 console.log("🔧 Farcaster Ethereum Provider Fix - Loading");
 
+// Add a global flag to track if the fix has been applied
+window.__farcasterEthProviderFixApplied = false;
+
 // Wait for the Farcaster SDK to be available
 const waitForFarcasterSDK = () => {
   return new Promise((resolve) => {
@@ -20,6 +23,12 @@ const waitForFarcasterSDK = () => {
 
 // Apply the fix
 waitForFarcasterSDK().then(() => {
+  // Check if fix is already applied
+  if (window.__farcasterEthProviderFixApplied) {
+    console.log("⚠️ Farcaster Ethereum Provider Fix already applied - skipping");
+    return;
+  }
+  
   // Store the original getEthereumProvider method
   const originalGetEthereumProvider = window.farcaster.wallet.getEthereumProvider;
   
@@ -109,5 +118,9 @@ waitForFarcasterSDK().then(() => {
     }
   };
   
+  // Set the flag to indicate the fix has been applied
+  window.__farcasterEthProviderFixApplied = true;
   console.log("✅ Farcaster Ethereum Provider Fix - Applied");
+}).catch(error => {
+  console.error("❌ Error applying Farcaster Ethereum Provider Fix:", error);
 });
