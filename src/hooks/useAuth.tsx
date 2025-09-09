@@ -63,29 +63,48 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (isMiniApp && window.farcaster) {
           console.log("📱 Mini App environment detected - using Quick Auth");
           
-          // Use Quick Auth for automatic authentication
-          if (window.farcaster.quickAuth?.getToken) {
-            try {
-              console.log("🔍 Attempting Quick Auth...");
-              const tokenResult = await window.farcaster.quickAuth.getToken();
-              console.log("✅ Quick Auth token received:", tokenResult);
-              
-              // Get user info using the token
-              const farcasterUser = await window.farcaster.getUser();
-              if (farcasterUser) {
-                console.log("✅ User info received:", farcasterUser);
-                const profile = await getOrCreateUserProfile(farcasterUser);
-                setUser(profile);
+          // Check if getUser function is available
+          if (typeof window.farcaster.getUser === 'function') {
+            console.log("✅ getUser function is available");
+            
+            // Use Quick Auth for automatic authentication
+            if (window.farcaster.quickAuth?.getToken) {
+              try {
+                console.log("🔍 Attempting Quick Auth...");
+                const tokenResult = await window.farcaster.quickAuth.getToken();
+                console.log("✅ Quick Auth token received:", tokenResult);
                 
-                // Call ready() AFTER successful authentication
-                if (window.farcaster.actions?.ready) {
-                  window.farcaster.actions.ready();
-                  console.log("✅ Called sdk.actions.ready() after auth");
+                // Get user info using the token
+                const farcasterUser = await window.farcaster.getUser();
+                if (farcasterUser) {
+                  console.log("✅ User info received:", farcasterUser);
+                  const profile = await getOrCreateUserProfile(farcasterUser);
+                  setUser(profile);
+                  
+                  // Call ready() AFTER successful authentication
+                  if (window.farcaster.actions?.ready) {
+                    window.farcaster.actions.ready();
+                    console.log("✅ Called sdk.actions.ready() after auth");
+                  }
+                }
+              } catch (quickAuthError) {
+                console.warn("⚠️ Quick Auth failed, falling back to manual auth:", quickAuthError);
+                // Fallback to manual authentication if Quick Auth fails
+                const farcasterUser = await window.farcaster.getUser();
+                if (farcasterUser) {
+                  const profile = await getOrCreateUserProfile(farcasterUser);
+                  setUser(profile);
+                  
+                  // Call ready() AFTER successful authentication
+                  if (window.farcaster.actions?.ready) {
+                    window.farcaster.actions.ready();
+                    console.log("✅ Called sdk.actions.ready() after fallback auth");
+                  }
                 }
               }
-            } catch (quickAuthError) {
-              console.warn("⚠️ Quick Auth failed, falling back to manual auth:", quickAuthError);
-              // Fallback to manual authentication if Quick Auth fails
+            } else {
+              // Fallback to manual authentication if Quick Auth not available
+              console.log("🔍 Quick Auth not available, using manual auth");
               const farcasterUser = await window.farcaster.getUser();
               if (farcasterUser) {
                 const profile = await getOrCreateUserProfile(farcasterUser);
@@ -94,23 +113,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 // Call ready() AFTER successful authentication
                 if (window.farcaster.actions?.ready) {
                   window.farcaster.actions.ready();
-                  console.log("✅ Called sdk.actions.ready() after fallback auth");
+                  console.log("✅ Called sdk.actions.ready() after manual auth");
                 }
               }
             }
           } else {
-            // Fallback to manual authentication if Quick Auth not available
-            console.log("🔍 Quick Auth not available, using manual auth");
-            const farcasterUser = await window.farcaster.getUser();
-            if (farcasterUser) {
-              const profile = await getOrCreateUserProfile(farcasterUser);
-              setUser(profile);
-              
-              // Call ready() AFTER successful authentication
-              if (window.farcaster.actions?.ready) {
-                window.farcaster.actions.ready();
-                console.log("✅ Called sdk.actions.ready() after manual auth");
+            console.warn("⚠️ getUser function not available yet, waiting...");
+            // Wait a bit more and try again
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            if (typeof window.farcaster.getUser === 'function') {
+              console.log("✅ getUser function now available, retrying...");
+              const farcasterUser = await window.farcaster.getUser();
+              if (farcasterUser) {
+                const profile = await getOrCreateUserProfile(farcasterUser);
+                setUser(profile);
+                
+                if (window.farcaster.actions?.ready) {
+                  window.farcaster.actions.ready();
+                  console.log("✅ Called sdk.actions.ready() after retry");
+                }
               }
+            } else {
+              console.warn("⚠️ getUser function still not available after waiting");
             }
           }
         } else {
