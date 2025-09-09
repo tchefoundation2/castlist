@@ -1,18 +1,18 @@
 {
   "name": "Castlist",
   "description": "Transform your Readings into a Social Journey",
-  "icon": "/farcaster-white.svg",
+  "icon": "https://castlist.vercel.app/farcaster-white.svg",
   "splash": {
-    "icon": "/farcaster-white.svg",
+    "icon": "https://castlist.vercel.app/farcaster-white.svg",
     "background": "#8A63D2"
   },
   "screenshots": [
     {
-      "url": "/screenshot1.png",
+      "url": "https://castlist.vercel.app/screenshot1.png",
       "alt": "Castlist Home Screen"
     },
     {
-      "url": "/screenshot2.png", 
+      "url": "https://castlist.vercel.app/screenshot2.png", 
       "alt": "Castlist Guide Creation"
     }
   ],
@@ -20,14 +20,14 @@
     "user:read",
     "user:write"
   ],
-  "version": "1.0.0",
+  "version": "2.0.0",
   "developer": {
     "name": "Castlist Team",
-    "url": "https://castlist.app"
+    "url": "https://castlist.vercel.app"
   },
   "accountAssociation": {
     "header": "eyJmaWQiOjExODM2MTAsInR5cGUiOiJhdXRoIiwia2V5IjoiMHg3NEZiNzMzODA0NzMwZDVkOEM2ZUEwNDRmYWUzZTVkNjY2MzY2ODI3In0",
-    "payload": "eyJkb21haW4iOiJmMjdhZmJiMzgwMTEubmdyb2stZnJlZS5hcHAifQ",
+    "payload": "eyJkb21haW4iOiJjYXN0bGlzdC52ZXJjZWwuYXBwIn0",
     "signature": "Piy5+ObxTJd9d1XWuEobYqT873GbFS3oVwTfJeBiu3NbsnQ+VJ+L6cyWEQQzvi8fgp2+vkwPiOD4FbbzF8Ra7Bs="
   }
 }
