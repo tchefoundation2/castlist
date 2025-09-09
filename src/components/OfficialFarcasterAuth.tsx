@@ -25,6 +25,36 @@ const OfficialFarcasterAuth: React.FC = () => {
         setIsReady(true);
         console.log("✅ sdk.actions.ready() called successfully");
         
+        // Try to add mini app and get user info automatically
+        try {
+          if (sdk.actions.addMiniApp) {
+            console.log("🔍 Auto-calling sdk.actions.addMiniApp()...");
+            const addResult = await sdk.actions.addMiniApp();
+            console.log("✅ addMiniApp result:", addResult);
+            
+            // Try to get user info after addMiniApp
+            if (sdk.actions.getUser) {
+              const userInfo = await sdk.actions.getUser();
+              console.log("✅ Auto-detected user info:", userInfo);
+              
+              if (userInfo && 'fid' in userInfo) {
+                const user = {
+                  id: userInfo.fid.toString(),
+                  fid: userInfo.fid,
+                  username: userInfo.username || 'unknown',
+                  pfp_url: userInfo.pfp_url || '',
+                  email: `${userInfo.username}@farcaster.xyz`
+                };
+                console.log("✅ Auto-login successful:", user);
+                loginAsMockUser(user);
+                return;
+              }
+            }
+          }
+        } catch (autoAuthError) {
+          console.log("ℹ️ Auto-authentication not available:", autoAuthError);
+        }
+        
       } catch (error) {
         console.warn("⚠️ Farcaster SDK not available, checking window.farcaster...", error);
         
