@@ -66,23 +66,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (isInMiniApp) {
           console.log("📱 Mini App environment detected");
           
-          // Get user from context
-          try {
-            const context = await window.farcaster.context.get();
-            console.log("✅ Context received:", context);
+          // Check if user data is available from SDK
+          if (window.farcasterUser) {
+            console.log("✅ User data found from SDK:", window.farcasterUser);
             
-            if (context && context.user) {
-              console.log("✅ User found in context:", context.user);
-              
-              // Create user profile
-              const profile = await getOrCreateUserProfile(context.user);
-              setUser(profile);
-              console.log("✅ User authenticated successfully");
-            } else {
-              console.warn("⚠️ No user found in context");
-            }
-          } catch (contextError) {
-            console.error("❌ Error getting context:", contextError);
+            // Create user profile
+            const profile = await getOrCreateUserProfile(window.farcasterUser);
+            setUser(profile);
+            console.log("✅ User authenticated successfully");
+          } else {
+            console.warn("⚠️ No user data available from SDK");
+            console.log("ℹ️ User may need to authenticate first");
           }
         } else {
           console.log("🌐 Web browser detected - QR code authentication needed");

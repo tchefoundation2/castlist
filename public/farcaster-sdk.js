@@ -41,18 +41,39 @@ const initializeFarcaster = async () => {
         console.log("✅ Is in Mini App:", isInMiniApp);
         
         if (isInMiniApp) {
-          // We're in a Mini App - get user context directly
-          console.log("📱 In Mini App - getting user context");
+          // We're in a Mini App - try to get user via quickAuth
+          console.log("📱 In Mini App - attempting authentication");
           try {
-            const context = await sdk.context.get();
-            console.log("✅ Context:", context);
+            // Try quickAuth first
+            if (sdk.quickAuth) {
+              console.log("🔍 Trying quickAuth...");
+              const tokenResult = await sdk.quickAuth.getToken();
+              console.log("✅ QuickAuth token:", tokenResult);
+              
+              // Store token for later use
+              window.farcasterToken = tokenResult.token;
+            }
             
-            if (context && context.user) {
-              console.log("✅ User found in context:", context.user);
-              window.farcasterUser = context.user;
+            // Try to get user info via actions.signIn
+            if (sdk.actions && sdk.actions.signIn) {
+              console.log("🔍 Trying actions.signIn...");
+              try {
+                const signInResult = await sdk.actions.signIn({
+                  nonce: Math.random().toString(36).substring(2, 15),
+                  acceptAuthAddress: true
+                });
+                console.log("✅ SignIn result:", signInResult);
+                
+                if (signInResult && signInResult.user) {
+                  console.log("✅ User found via signIn:", signInResult.user);
+                  window.farcasterUser = signInResult.user;
+                }
+              } catch (signInError) {
+                console.log("⚠️ SignIn failed:", signInError);
+              }
             }
           } catch (e) {
-            console.log("⚠️ Could not get context:", e);
+            console.log("⚠️ Authentication failed:", e);
           }
         } else {
           // We're in web browser - need QR code authentication
