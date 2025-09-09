@@ -25,16 +25,11 @@ const AppContent: React.FC = () => {
   const { isLoading: isDataLoading, refreshAllData } = useData();
   const { isLoaded: isSDKLoaded, isReady: isSDKReady, hasActions } = useFarcasterSDKSimple();
   
-  // Check if we're in a Farcaster mini app environment
-  const isMiniApp = window.farcaster && (window.farcaster.actions || window.farcaster.quickAuth);
-  
   // Debug logs
-  console.log("🔍 App.tsx - Environment detection:");
-  console.log("🔍 window.farcaster:", window.farcaster);
-  console.log("🔍 isMiniApp:", isMiniApp);
+  console.log("🔍 App.tsx - State:");
   console.log("🔍 isAuthenticated:", isAuthenticated);
   console.log("🔍 isAuthLoading:", isAuthLoading);
-  console.log("🔍 document.readyState:", document.readyState);
+  console.log("🔍 user:", user);
   const [page, setPage] = useState<Page>(Page.Home);
   const [activeTab, setActiveTab] = useState<Page>(Page.Home);
   const [selectedGuideId, setSelectedGuideId] = useState<number | null>(null);
@@ -141,25 +136,19 @@ const AppContent: React.FC = () => {
   
   // AuthKit logic moved to the !isAuthenticated section below
 
+  // Show loading while checking authentication
   if (isAuthLoading) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-purple-50 to-blue-100 dark:from-gray-900 dark:via-gray-900 dark:to-black">
-            <div className="text-center">
-              <Loader text="Authenticating..." />
-              {isSDKLoaded && (
-                <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                  <p>SDK Loaded: ✅</p>
-                  <p>SDK Ready: {isSDKReady ? '✅' : '⏳'}</p>
-                  <p>Has Actions: {hasActions ? '✅' : '❌'}</p>
-                </div>
-              )}
-            </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-purple-50 to-blue-100 dark:from-gray-900 dark:via-gray-900 dark:to-black">
+        <div className="text-center">
+          <Loader text="Loading..." />
         </div>
+      </div>
     );
   }
 
+  // If not authenticated, show splash screen (v2 compliance)
   if (!isAuthenticated) {
-    // Always use LoginPage (splash screen only for v2 compliance)
     return <LoginPage />;
   }
   

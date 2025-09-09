@@ -5,26 +5,19 @@ import { getOrCreateUserProfile } from '../services/supabaseService';
 // Define the Farcaster SDK type on the window object for TypeScript
 declare global {
   interface Window {
-    // Mini App SDK (inside Farcaster mobile/web app)
+    // Mini App SDK v2 (inside Farcaster mobile/web app)
     farcaster?: {
-      signIn: () => Promise<{ fid: number; username: string; pfp_url: string; message: string; signature: string; nonce: string; } | { error: string }>;
-      getUser: () => Promise<{ fid: number; username: string; pfp_url: string; } | null>;
-      actions?: {
-        ready: () => void;
+      isInMiniApp: () => Promise<boolean>;
+      context: {
+        get: () => Promise<{ user?: { fid: number; username: string; pfp_url: string; } } | null>;
       };
-      quickAuth?: {
-        getToken: () => Promise<{ token: string; }>;
-        fetch: (url: string, options?: RequestInit) => Promise<Response>;
+      actions: {
+        ready: () => Promise<void>;
       };
+      getCapabilities: () => Promise<string[]>;
+      getChains: () => Promise<any[]>;
     };
-  // Web App SDK (standalone web app)
-  FarcasterAuthKit?: {
-    AuthKitProvider: any;
-    SignInButton: any;
-    useProfile: any;
-    useSignIn: any;
-    QRCode: any;
-  };
+    farcasterUser?: { fid: number; username: string; pfp_url: string; };
   }
 }
 
@@ -46,115 +39,63 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Check for an existing Farcaster session when the app loads
   useEffect(() => {
     const checkFarcasterSession = async () => {
-      console.log("🔍 Starting authentication check...");
+      console.log("🔍 Starting Farcaster v2 authentication...");
       setIsLoading(true);
       
-      // Wait a bit to see if SDK loads
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
       try {
-        // Check if we're in a Farcaster mini app environment
-        const isMiniApp = window.farcaster && (window.farcaster.actions || window.farcaster.quickAuth);
+        // Wait for SDK to load
+        let attempts = 0;
+        while (!window.farcaster && attempts < 10) {
+          console.log(`⏳ Waiting for SDK... attempt ${attempts + 1}`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          attempts++;
+        }
         
-        console.log("🔍 Environment detection:");
-        console.log("  - isMiniApp:", isMiniApp);
-        console.log("  - window.farcaster:", !!window.farcaster);
-        console.log("  - window.farcaster.getUser:", typeof window.farcaster?.getUser);
-        console.log("  - window.farcaster.quickAuth:", !!window.farcaster?.quickAuth);
-        console.log("  - window.farcaster.actions:", !!window.farcaster?.actions);
+        if (!window.farcaster) {
+          console.warn("⚠️ Farcaster SDK not found after 10 seconds");
+          setIsLoading(false);
+          return;
+        }
         
-        if (isMiniApp && window.farcaster) {
-          console.log("📱 Mini App environment detected - using Quick Auth");
+        console.log("✅ Farcaster SDK found");
+        
+        // Check if we're in a mini app
+        const isInMiniApp = await window.farcaster.isInMiniApp();
+        console.log("🔍 Is in Mini App:", isInMiniApp);
+        
+        if (isInMiniApp) {
+          console.log("📱 Mini App environment detected");
           
-          // Try to authenticate with multiple approaches
-          let authenticated = false;
-          
-          // Approach 1: Quick Auth
-          if (window.farcaster.quickAuth?.getToken && typeof window.farcaster.getUser === 'function') {
-            try {
-              console.log("🔍 Attempting Quick Auth...");
-              const tokenResult = await window.farcaster.quickAuth.getToken();
-              console.log("✅ Quick Auth token received:", tokenResult);
-              
-              const farcasterUser = await window.farcaster.getUser();
-              if (farcasterUser) {
-                console.log("✅ User info received:", farcasterUser);
-                const profile = await getOrCreateUserProfile(farcasterUser);
-                setUser(profile);
-                authenticated = true;
-                console.log("✅ Authentication successful via Quick Auth");
-              }
-            } catch (quickAuthError) {
-              console.warn("⚠️ Quick Auth failed:", quickAuthError);
-            }
-          }
-          
-          // Approach 2: Direct getUser if Quick Auth failed
-          if (!authenticated && typeof window.farcaster.getUser === 'function') {
-            try {
-              console.log("🔍 Attempting direct getUser...");
-              const farcasterUser = await window.farcaster.getUser();
-              if (farcasterUser) {
-                console.log("✅ User info received via direct getUser:", farcasterUser);
-                const profile = await getOrCreateUserProfile(farcasterUser);
-                setUser(profile);
-                authenticated = true;
-                console.log("✅ Authentication successful via direct getUser");
-              }
-            } catch (getUserError) {
-              console.warn("⚠️ Direct getUser failed:", getUserError);
-            }
-          }
-          
-          // Approach 3: Wait and retry if functions not available
-          if (!authenticated) {
-            console.warn("⚠️ Functions not available, waiting and retrying...");
-            await new Promise(resolve => setTimeout(resolve, 3000));
+          // Get user from context
+          try {
+            const context = await window.farcaster.context.get();
+            console.log("✅ Context received:", context);
             
-            if (typeof window.farcaster.getUser === 'function') {
-              try {
-                console.log("🔍 Retrying getUser after wait...");
-                const farcasterUser = await window.farcaster.getUser();
-                if (farcasterUser) {
-                  console.log("✅ User info received after retry:", farcasterUser);
-                  const profile = await getOrCreateUserProfile(farcasterUser);
-                  setUser(profile);
-                  authenticated = true;
-                  console.log("✅ Authentication successful after retry");
-                }
-              } catch (retryError) {
-                console.warn("⚠️ Retry failed:", retryError);
-              }
+            if (context && context.user) {
+              console.log("✅ User found in context:", context.user);
+              
+              // Create user profile
+              const profile = await getOrCreateUserProfile(context.user);
+              setUser(profile);
+              console.log("✅ User authenticated successfully");
+            } else {
+              console.warn("⚠️ No user found in context");
             }
-          }
-          
-          if (authenticated) {
-            // Call ready() AFTER successful authentication
-            if (window.farcaster.actions?.ready) {
-              window.farcaster.actions.ready();
-              console.log("✅ Called sdk.actions.ready() after auth");
-            }
-          } else {
-            console.warn("⚠️ All authentication attempts failed");
+          } catch (contextError) {
+            console.error("❌ Error getting context:", contextError);
           }
         } else {
-          // No Farcaster SDK - show splash screen only
-          console.warn("Farcaster SDK not found. Showing splash screen only.");
+          console.log("ℹ️ Not in Mini App environment - running standalone");
         }
         
       } catch (e) {
-        console.error("Error checking Farcaster session:", e);
+        console.error("❌ Error in authentication check:", e);
       } finally {
-        console.log("🔍 Authentication check complete, setting loading to false");
+        console.log("🔍 Authentication check complete");
         setIsLoading(false);
       }
-      
-      // Add a timeout as backup to prevent infinite loading
-      setTimeout(() => {
-        console.warn("⚠️ Backup timeout - forcing loading to false");
-        setIsLoading(false);
-      }, 15000); // 15 second backup timeout
     };
+    
     checkFarcasterSession();
   }, []);
 

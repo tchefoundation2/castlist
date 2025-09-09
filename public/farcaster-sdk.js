@@ -1,4 +1,4 @@
-console.log("🚀 Farcaster SDK Helper - MiniApp SDK Version");
+console.log("🚀 Farcaster SDK Helper - MiniApp SDK v2");
 
 // Import and initialize the real Farcaster MiniApp SDK
 import { sdk } from "https://esm.sh/@farcaster/miniapp-sdk";
@@ -8,96 +8,72 @@ const initializeFarcaster = async () => {
   console.log("  - Location:", window.location.href);
   console.log("  - In iframe:", window !== window.top);
   console.log("  - Referrer:", document.referrer);
-  console.log("  - window.farcaster:", !!window.farcaster);
-  
+
   try {
-    // Initialize the real Farcaster SDK
-    console.log("🔧 Initializing real Farcaster MiniApp SDK...");
-    
     // Check if we're in a Farcaster environment
     if (window !== window.top || document.referrer.includes('farcaster.xyz')) {
-      console.log("📱 Farcaster environment detected");
+      console.log("📱 Farcaster environment detected - initializing SDK");
       
-      // Wait a bit for SDK to fully load
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Make SDK available globally - use the actual SDK object directly
+      // Make SDK available globally
       window.farcaster = sdk;
-      console.log("✅ Farcaster SDK made available globally");
+      console.log("✅ Farcaster SDK v2 loaded");
       console.log("✅ Available methods:", Object.keys(window.farcaster));
-      console.log("✅ SDK object:", window.farcaster);
-      console.log("✅ quickAuth:", !!window.farcaster.quickAuth);
-      console.log("✅ actions:", !!window.farcaster.actions);
-      console.log("✅ context:", !!window.farcaster.context);
-      console.log("✅ wallet:", !!window.farcaster.wallet);
       
-      // SDK v2 uses different API - let's implement the correct methods
-      console.log("🔧 Implementing v2 API methods...");
-      
-      // Create getUser function using context
-      if (window.farcaster.context) {
-        window.farcaster.getUser = async () => {
-          try {
-            console.log("🔍 Getting user from context...");
-            const context = await window.farcaster.context.get();
-            console.log("✅ Context received:", context);
-            
-            if (context && context.user) {
-              return {
-                fid: context.user.fid,
-                username: context.user.username,
-                pfp_url: context.user.pfp_url
-              };
-            }
-            return null;
-          } catch (error) {
-            console.error("❌ Error getting user from context:", error);
-            return null;
-          }
-        };
-        console.log("✅ getUser function implemented using context");
+      // Check capabilities
+      try {
+        const capabilities = await sdk.getCapabilities();
+        console.log("✅ Capabilities:", capabilities);
+      } catch (e) {
+        console.log("⚠️ Could not get capabilities:", e);
       }
       
-      // Create signIn function using quickAuth
-      if (window.farcaster.quickAuth) {
-        window.farcaster.signIn = async () => {
-          try {
-            console.log("🔍 Signing in using quickAuth...");
-            const token = await window.farcaster.quickAuth.getToken();
-            console.log("✅ QuickAuth token received:", token);
-            
-            // After getting token, get user info
-            const user = await window.farcaster.getUser();
-            if (user) {
-              return {
-                fid: user.fid,
-                username: user.username,
-                pfp_url: user.pfp_url,
-                message: "Signed in successfully",
-                signature: "quickAuth",
-                nonce: "quickAuth"
-              };
-            }
-            return { error: "Failed to get user after sign in" };
-          } catch (error) {
-            console.error("❌ Error signing in:", error);
-            return { error: error.message };
-          }
-        };
-        console.log("✅ signIn function implemented using quickAuth");
+      // Check chains
+      try {
+        const chains = await sdk.getChains();
+        console.log("✅ Chains:", chains);
+      } catch (e) {
+        console.log("⚠️ Could not get chains:", e);
       }
       
-      console.log("🔍 Final check:");
-      console.log("  - getUser function:", typeof window.farcaster.getUser);
-      console.log("  - signIn function:", typeof window.farcaster.signIn);
-      
-      // Call ready() to signal the app is ready
-      if (window.farcaster.actions?.ready) {
-        window.farcaster.actions.ready();
-        console.log("✅ Real Farcaster SDK ready() called successfully");
+      // Check if we're in a mini app
+      try {
+        const isInMiniApp = await sdk.isInMiniApp();
+        console.log("✅ Is in Mini App:", isInMiniApp);
+      } catch (e) {
+        console.log("⚠️ Could not check isInMiniApp:", e);
       }
+      
+      // Get context (user info)
+      try {
+        const context = await sdk.context.get();
+        console.log("✅ Context:", context);
+        
+        if (context && context.user) {
+          console.log("✅ User found in context:", context.user);
+          // Store user info globally for easy access
+          window.farcasterUser = context.user;
+        }
+      } catch (e) {
+        console.log("⚠️ Could not get context:", e);
+      }
+      
+      // Signal that the app is ready
+      console.log("🚀 Calling sdk.actions.ready()...");
+      await sdk.actions.ready();
+      console.log("✅ App is ready!");
+      
     } else {
-      console.log("ℹ️ Not in Farcaster environment - SDK not initialized");
+      console.log("ℹ️ Not in Farcaster environment - running standalone");
+      // For standalone mode, create a mock SDK
+      window.farcaster = {
+        isInMiniApp: () => Promise.resolve(false),
+        context: {
+          get: () => Promise.resolve(null)
+        },
+        actions: {
+          ready: () => console.log("Mock ready() called")
+        }
+      };
     }
   } catch (error) {
     console.error("❌ Error initializing Farcaster SDK:", error);
