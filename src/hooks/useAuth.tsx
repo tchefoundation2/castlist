@@ -66,79 +66,76 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (isMiniApp && window.farcaster) {
           console.log("📱 Mini App environment detected - using Quick Auth");
           
-          // Check if getUser function is available
-          if (typeof window.farcaster.getUser === 'function') {
-            console.log("✅ getUser function is available");
-            
-            // Use Quick Auth for automatic authentication
-            if (window.farcaster.quickAuth?.getToken) {
-              try {
-                console.log("🔍 Attempting Quick Auth...");
-                const tokenResult = await window.farcaster.quickAuth.getToken();
-                console.log("✅ Quick Auth token received:", tokenResult);
-                
-                // Get user info using the token
-                const farcasterUser = await window.farcaster.getUser();
-                if (farcasterUser) {
-                  console.log("✅ User info received:", farcasterUser);
-                  const profile = await getOrCreateUserProfile(farcasterUser);
-                  setUser(profile);
-                  
-                  // Call ready() AFTER successful authentication
-                  if (window.farcaster.actions?.ready) {
-                    window.farcaster.actions.ready();
-                    console.log("✅ Called sdk.actions.ready() after auth");
-                  }
-                }
-              } catch (quickAuthError) {
-                console.warn("⚠️ Quick Auth failed, falling back to manual auth:", quickAuthError);
-                // Fallback to manual authentication if Quick Auth fails
-                const farcasterUser = await window.farcaster.getUser();
-                if (farcasterUser) {
-                  const profile = await getOrCreateUserProfile(farcasterUser);
-                  setUser(profile);
-                  
-                  // Call ready() AFTER successful authentication
-                  if (window.farcaster.actions?.ready) {
-                    window.farcaster.actions.ready();
-                    console.log("✅ Called sdk.actions.ready() after fallback auth");
-                  }
-                }
-              }
-            } else {
-              // Fallback to manual authentication if Quick Auth not available
-              console.log("🔍 Quick Auth not available, using manual auth");
+          // Try to authenticate with multiple approaches
+          let authenticated = false;
+          
+          // Approach 1: Quick Auth
+          if (window.farcaster.quickAuth?.getToken && typeof window.farcaster.getUser === 'function') {
+            try {
+              console.log("🔍 Attempting Quick Auth...");
+              const tokenResult = await window.farcaster.quickAuth.getToken();
+              console.log("✅ Quick Auth token received:", tokenResult);
+              
               const farcasterUser = await window.farcaster.getUser();
               if (farcasterUser) {
+                console.log("✅ User info received:", farcasterUser);
                 const profile = await getOrCreateUserProfile(farcasterUser);
                 setUser(profile);
-                
-                // Call ready() AFTER successful authentication
-                if (window.farcaster.actions?.ready) {
-                  window.farcaster.actions.ready();
-                  console.log("✅ Called sdk.actions.ready() after manual auth");
-                }
+                authenticated = true;
+                console.log("✅ Authentication successful via Quick Auth");
               }
+            } catch (quickAuthError) {
+              console.warn("⚠️ Quick Auth failed:", quickAuthError);
+            }
+          }
+          
+          // Approach 2: Direct getUser if Quick Auth failed
+          if (!authenticated && typeof window.farcaster.getUser === 'function') {
+            try {
+              console.log("🔍 Attempting direct getUser...");
+              const farcasterUser = await window.farcaster.getUser();
+              if (farcasterUser) {
+                console.log("✅ User info received via direct getUser:", farcasterUser);
+                const profile = await getOrCreateUserProfile(farcasterUser);
+                setUser(profile);
+                authenticated = true;
+                console.log("✅ Authentication successful via direct getUser");
+              }
+            } catch (getUserError) {
+              console.warn("⚠️ Direct getUser failed:", getUserError);
+            }
+          }
+          
+          // Approach 3: Wait and retry if functions not available
+          if (!authenticated) {
+            console.warn("⚠️ Functions not available, waiting and retrying...");
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            if (typeof window.farcaster.getUser === 'function') {
+              try {
+                console.log("🔍 Retrying getUser after wait...");
+                const farcasterUser = await window.farcaster.getUser();
+                if (farcasterUser) {
+                  console.log("✅ User info received after retry:", farcasterUser);
+                  const profile = await getOrCreateUserProfile(farcasterUser);
+                  setUser(profile);
+                  authenticated = true;
+                  console.log("✅ Authentication successful after retry");
+                }
+              } catch (retryError) {
+                console.warn("⚠️ Retry failed:", retryError);
+              }
+            }
+          }
+          
+          if (authenticated) {
+            // Call ready() AFTER successful authentication
+            if (window.farcaster.actions?.ready) {
+              window.farcaster.actions.ready();
+              console.log("✅ Called sdk.actions.ready() after auth");
             }
           } else {
-            console.warn("⚠️ getUser function not available yet, waiting...");
-            // Wait a bit more and try again
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            if (typeof window.farcaster.getUser === 'function') {
-              console.log("✅ getUser function now available, retrying...");
-              const farcasterUser = await window.farcaster.getUser();
-              if (farcasterUser) {
-                const profile = await getOrCreateUserProfile(farcasterUser);
-                setUser(profile);
-                
-                if (window.farcaster.actions?.ready) {
-                  window.farcaster.actions.ready();
-                  console.log("✅ Called sdk.actions.ready() after retry");
-                }
-              }
-            } else {
-              console.warn("⚠️ getUser function still not available after waiting");
-            }
+            console.warn("⚠️ All authentication attempts failed");
           }
         } else {
           // No Farcaster SDK - show splash screen only

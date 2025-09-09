@@ -19,11 +19,7 @@ const initializeFarcaster = async () => {
       console.log("📱 Farcaster environment detected");
       
       // Wait a bit for SDK to fully load
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Call ready() to signal the app is ready
-      sdk.actions.ready();
-      console.log("✅ Real Farcaster SDK ready() called successfully");
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Make SDK available globally - use the actual SDK object directly
       window.farcaster = sdk;
@@ -32,6 +28,14 @@ const initializeFarcaster = async () => {
       console.log("✅ SDK object:", window.farcaster);
       console.log("✅ getUser function:", typeof window.farcaster.getUser);
       console.log("✅ signIn function:", typeof window.farcaster.signIn);
+      console.log("✅ quickAuth:", !!window.farcaster.quickAuth);
+      console.log("✅ actions:", !!window.farcaster.actions);
+      
+      // Call ready() to signal the app is ready
+      if (window.farcaster.actions?.ready) {
+        window.farcaster.actions.ready();
+        console.log("✅ Real Farcaster SDK ready() called successfully");
+      }
     } else {
       console.log("ℹ️ Not in Farcaster environment - SDK not initialized");
     }
