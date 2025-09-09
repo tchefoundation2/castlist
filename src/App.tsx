@@ -19,7 +19,6 @@ import BottomNav from './components/BottomNav';
 import Header from './components/Header';
 import Loader from './components/Loader';
 import SDKDebug from './components/SDKDebug';
-import OfficialFarcasterAuth from './components/OfficialFarcasterAuth';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, user, isLoading: isAuthLoading } = useAuth();
@@ -29,15 +28,9 @@ const AppContent: React.FC = () => {
   // Check if we're in a Farcaster mini app environment
   const isMiniApp = window.farcaster && window.farcaster.actions && typeof window.farcaster.signIn === 'function';
   
-  // Check if we're on farcaster.xyz web
-  const isFarcasterWeb = window.location.hostname === 'farcaster.xyz' || 
-                        window.location.hostname.includes('farcaster.xyz') ||
-                        window.location.search.includes('farcaster.xyz');
-  
   // Debug logs
   console.log("🔍 App.tsx - Environment detection:");
   console.log("🔍 window.farcaster:", window.farcaster);
-  console.log("🔍 window.FarcasterAuthKit:", window.FarcasterAuthKit);
   console.log("🔍 isMiniApp:", isMiniApp);
   console.log("🔍 isAuthenticated:", isAuthenticated);
   console.log("🔍 isAuthLoading:", isAuthLoading);
@@ -166,16 +159,8 @@ const AppContent: React.FC = () => {
   }
 
   if (!isAuthenticated) {
-    // For mini app, use LoginPage (with Farcaster splash screen)
-    // For farcaster.xyz web, use FarcasterAuthKit with QR code
-    // For other web apps, use FarcasterAuthKit
-    if (isMiniApp) {
-      return <LoginPage />;
-    } else if (isFarcasterWeb) {
-      return <OfficialFarcasterAuth />;
-    } else {
-      return <OfficialFarcasterAuth />;
-    }
+    // Always use LoginPage (splash screen only for v2 compliance)
+    return <LoginPage />;
   }
   
   const mainContentPadding = showSearch ? 'pt-36' : 'pt-24';

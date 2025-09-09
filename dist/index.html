@@ -13,8 +13,8 @@
       script-src 'self' 'unsafe-inline' 'unsafe-eval' https://esm.sh https://unpkg.com https://cdn.jsdelivr.net https://client.farcaster.xyz https://www.googletagmanager.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       font-src 'self' https://fonts.gstatic.com;
-      img-src 'self' data: https: blob: https://castlist.netlify.app;
-      connect-src 'self' https://esm.sh https://unpkg.com https://cdn.jsdelivr.net https://mainnet.optimism.io https://relay.farcaster.xyz https://api.neynar.com https://client.farcaster.xyz https://castlist.netlify.app https://explorer-api.walletconnect.com;
+      img-src 'self' data: https: blob: https://castlist.vercel.app;
+      connect-src 'self' https://esm.sh https://unpkg.com https://cdn.jsdelivr.net https://mainnet.optimism.io https://relay.farcaster.xyz https://api.neynar.com https://client.farcaster.xyz https://castlist.vercel.app https://explorer-api.walletconnect.com;
       frame-src 'self' https://farcaster.xyz;
       object-src 'none';
       base-uri 'self';
@@ -23,21 +23,21 @@
       child-src 'self' blob:;
     " />
     
-    <!-- Farcaster Mini App Embed Tags -->
-    <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://castlist.netlify.app/farcaster-white.svg","button":{"title":"Open Castlist","action":{"type":"launch_frame","name":"Castlist","url":"https://castlist.netlify.app","splashImageUrl":"https://castlist.netlify.app/farcaster-white.svg","splashBackgroundColor":"#8A63D2"}}}' />
+    <!-- Farcaster Mini App v2 Embed Tags -->
+    <meta name="fc:miniapp" content='{"version":"2","imageUrl":"https://castlist.vercel.app/farcaster-white.svg","button":{"title":"Open Castlist","action":{"type":"launch_frame","name":"Castlist","url":"https://castlist.vercel.app","splashImageUrl":"https://castlist.vercel.app/farcaster-white.svg","splashBackgroundColor":"#8A63D2"}}}' />
     
     <!-- Open Graph Meta Tags for better embed detection -->
     <meta property="og:title" content="Castlist" />
     <meta property="og:description" content="Transform your Readings into a Social Journey" />
-    <meta property="og:image" content="https://castlist.netlify.app/farcaster-white.svg" />
-    <meta property="og:url" content="https://castlist.netlify.app" />
+    <meta property="og:image" content="https://castlist.vercel.app/farcaster-white.svg" />
+    <meta property="og:url" content="https://castlist.vercel.app" />
     <meta property="og:type" content="website" />
     <!-- Farcaster SDK - Smart Detection -->
     <script type="module" src="/farcaster-sdk.js"></script>
-    <script type="module" crossorigin src="/assets/index-CPZGsuqn.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CWb8HkUS.css">
+    <script type="module" crossorigin src="/assets/index-D1K_v8Y8.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Cfm-6-PJ.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
   </body>
 </html>

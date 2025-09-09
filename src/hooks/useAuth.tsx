@@ -32,7 +32,6 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  error: string | null;
   login: () => Promise<{error?: any}>;
   logout: () => Promise<void>;
   loginAsMockUser: (user: User) => void; // For development only
@@ -43,7 +42,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Check for an existing Farcaster session when the app loads
   useEffect(() => {
@@ -51,52 +49,76 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(true);
       try {
         // Check if we're in a Farcaster mini app environment
-        const isMiniApp = window.farcaster && window.farcaster.signIn;
-        // Check if we're in a standalone web app environment
-        const isWebApp = window.FarcasterAuthKit && window.FarcasterAuthKit.AuthKitProvider;
+        const isMiniApp = window.farcaster && window.farcaster.actions;
         
         console.log("🔍 Environment detection:");
         console.log("  - isMiniApp:", isMiniApp);
-        console.log("  - isWebApp:", isWebApp);
         console.log("  - window.farcaster:", !!window.farcaster);
-        console.log("  - window.FarcasterAuthKit:", !!window.FarcasterAuthKit);
         
         if (isMiniApp && window.farcaster) {
-          console.log("📱 Mini App environment detected - using window.farcaster");
-          // Call sdk.actions.ready() to hide splash screen only for real SDK
-          const isRealSDK = !window.farcaster?.signIn?.toString().includes('Mock') && 
-                           !window.farcaster?.signIn?.toString().includes('Enhanced mock');
+          console.log("📱 Mini App environment detected - using Quick Auth");
           
-          if (window.farcaster.actions?.ready && isRealSDK) {
+          // Call sdk.actions.ready() to hide splash screen
+          if (window.farcaster.actions?.ready) {
             window.farcaster.actions.ready();
-            console.log("Called sdk.actions.ready() on REAL SDK");
-          } else if (window.farcaster.actions?.ready && !isRealSDK) {
-            console.log("Mock SDK detected - not calling ready() to avoid popup issues");
+            console.log("✅ Called sdk.actions.ready()");
           }
           
-          const farcasterUser = await window.farcaster.getUser();
-          if (farcasterUser) {
-            const profile = await getOrCreateUserProfile(farcasterUser);
-            setUser(profile);
-          }
-        } else if (isWebApp && window.FarcasterAuthKit) {
-          console.log("🌐 Web App environment detected - using FarcasterAuthKit");
-          // Web app environment: use AuthKit
-          try {
-            // AuthKit doesn't have getUser() - it uses useProfile hook
-            // This will be handled by the FarcasterAuthKit component
-            console.log("AuthKit detected but getUser() not available - using component instead");
-            // AuthKit user handling is done in the component
-            console.log("AuthKit user handling done in component");
-          } catch (error) {
-            console.log("No user session in web app");
+          // Use Quick Auth for automatic authentication
+          if (window.farcaster.quickAuth?.getToken) {
+            try {
+              console.log("🔍 Attempting Quick Auth...");
+              const tokenResult = await window.farcaster.quickAuth.getToken();
+              console.log("✅ Quick Auth token received:", tokenResult);
+              
+              // Get user info using the token
+              const farcasterUser = await window.farcaster.getUser();
+              if (farcasterUser) {
+                console.log("✅ User info received:", farcasterUser);
+                const profile = await getOrCreateUserProfile(farcasterUser);
+                setUser(profile);
+              }
+            } catch (quickAuthError) {
+              console.warn("⚠️ Quick Auth failed, falling back to manual auth:", quickAuthError);
+              // Fallback to manual authentication if Quick Auth fails
+              const farcasterUser = await window.farcaster.getUser();
+              if (farcasterUser) {
+                const profile = await getOrCreateUserProfile(farcasterUser);
+                setUser(profile);
+              }
+            }
+          } else {
+            // Fallback to manual authentication if Quick Auth not available
+            console.log("🔍 Quick Auth not available, using manual auth");
+            const farcasterUser = await window.farcaster.getUser();
+            if (farcasterUser) {
+              const profile = await getOrCreateUserProfile(farcasterUser);
+              setUser(profile);
+            }
           }
         } else {
-            // In dev mode, don't auto-login. Let the user choose from the login page.
-            console.warn("Farcaster SDK not found. Displaying developer login options.");
+          // Development mode: use mock user for testing
+          console.warn("Farcaster SDK not found. Using development mode.");
+          const mockUser: User = {
+            id: 'dev-user-1',
+            fid: 1,
+            username: 'farcaster.eth',
+            pfp_url: 'https://i.imgur.com/34Iodlt.jpg',
+            email: 'dev@example.com'
+          };
+          setUser(mockUser);
         }
       } catch (e) {
         console.error("Error checking Farcaster session:", e);
+        // In case of error, use mock user for development
+        const mockUser: User = {
+          id: 'dev-user-1',
+          fid: 1,
+          username: 'farcaster.eth',
+          pfp_url: 'https://i.imgur.com/34Iodlt.jpg',
+          email: 'dev@example.com'
+        };
+        setUser(mockUser);
       } finally {
         setIsLoading(false);
       }
@@ -105,83 +127,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const login = async () => {
-    setIsLoading(true);
-    try {
-      // Check if user wants to use real Farcaster
-      const useRealFarcaster = localStorage.getItem('useRealFarcaster') === 'true';
-      
-      // Check environment
-      const isMiniApp = window.farcaster && window.farcaster.signIn;
-      const isWebApp = window.FarcasterAuthKit && window.FarcasterAuthKit.AuthKitProvider;
-      
-      if (isMiniApp) {
-        console.log("📱 Mini App login - using window.farcaster");
-      } else if (isWebApp) {
-        console.log("🌐 Web App login - using FarcasterAuthKit");
-      }
-      
-      if (!isMiniApp && !isWebApp) {
-          if (useRealFarcaster) {
-            // Real Farcaster mode but SDK not available
-            console.warn("Real Farcaster mode enabled but SDK not available. Please refresh the page.");
-            setError("Real Farcaster SDK not available. Please refresh the page.");
-            setIsLoading(false);
-            return { error: "Real Farcaster SDK not available" };
-          } else {
-            // Development mode: use mock user
-            console.warn("Farcaster SDK not available. Using development mode.");
-            const mockUser: User = {
-              id: 'dev-user-1',
-              fid: 1,
-              username: 'farcaster.eth',
-              pfp_url: 'https://i.imgur.com/34Iodlt.jpg',
-              email: 'dev@example.com'
-            };
-            setUser(mockUser);
-            setIsLoading(false);
-            return {};
-          }
-      }
-      
-      if (isMiniApp && window.farcaster) {
-        // Mini App login
-        // Call sdk.actions.ready() before sign in only for real SDK
-        const isRealSDK = !window.farcaster?.signIn?.toString().includes('Mock') && 
-                         !window.farcaster?.signIn?.toString().includes('Enhanced mock');
-        
-        if (window.farcaster.actions?.ready && isRealSDK) {
-          window.farcaster.actions.ready();
-          console.log("Called sdk.actions.ready() before login on REAL SDK");
-        } else if (window.farcaster.actions?.ready && !isRealSDK) {
-          console.log("Mock SDK detected - not calling ready() before login to avoid popup issues");
-        }
-        
-        const result = await window.farcaster.signIn();
-        
-        if ('error' in result) {
-          throw new Error(result.error);
-        }
-        
-        const profile = await getOrCreateUserProfile(result);
-        setUser(profile);
-        
-      } else if (isWebApp && window.FarcasterAuthKit) {
-        // Web App login
-        // AuthKit doesn't have signIn() - it uses SignInButton component
-        // This will be handled by the FarcasterAuthKit component
-        console.log("AuthKit detected but signIn() not available - using component instead");
-        throw new Error("AuthKit login must be handled by component");
-      } else {
-        throw new Error("No Farcaster SDK available");
-      }
-      
-      setIsLoading(false);
-      return {};
-    } catch (error) {
-      console.error("Farcaster login failed:", error);
-      setIsLoading(false);
-      return { error };
-    }
+    // Login is now handled automatically via Quick Auth in useEffect
+    // This function is kept for compatibility but should not be called
+    console.warn("Manual login is not supported in v2 compliance mode. Authentication is automatic.");
+    return { error: "Manual login not supported" };
   };
 
   const logout = async () => {
@@ -207,7 +156,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     user,
     isAuthenticated: !!user,
     isLoading,
-    error,
     login,
     logout,
     loginAsMockUser,
