@@ -22,15 +22,11 @@ const initializeFarcaster = async () => {
       sdk.actions.ready();
       console.log("✅ Real Farcaster SDK ready() called successfully");
       
-      // Make SDK available globally with correct methods
-      window.farcaster = {
-        signIn: sdk.signIn,
-        getUser: sdk.getUser,
-        actions: sdk.actions,
-        quickAuth: sdk.quickAuth
-      };
+      // Make SDK available globally - use the actual SDK object directly
+      window.farcaster = sdk;
       console.log("✅ Farcaster SDK made available globally");
       console.log("✅ Available methods:", Object.keys(window.farcaster));
+      console.log("✅ SDK object:", window.farcaster);
     } else {
       console.log("ℹ️ Not in Farcaster environment - SDK not initialized");
     }
