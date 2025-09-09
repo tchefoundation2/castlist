@@ -80,6 +80,9 @@ const initializeFarcaster = async () => {
                   
                   console.log("🔧 Using mock user data for now:", mockUser);
                   window.farcasterUser = mockUser;
+                  
+                  // Trigger a custom event to notify the app that user is ready
+                  window.dispatchEvent(new CustomEvent('farcasterUserReady', { detail: mockUser }));
                 }
               } catch (signInError) {
                 console.log("⚠️ SignIn failed:", signInError);

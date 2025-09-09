@@ -92,7 +92,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     };
     
+    // Listen for user ready event
+    const handleUserReady = async (event: CustomEvent) => {
+      console.log("🎉 User ready event received:", event.detail);
+      const userData = event.detail;
+      
+      try {
+        const profile = await getOrCreateUserProfile(userData);
+        setUser(profile);
+        console.log("✅ User authenticated successfully via event");
+      } catch (error) {
+        console.error("❌ Error creating user profile:", error);
+      }
+    };
+    
+    window.addEventListener('farcasterUserReady', handleUserReady as EventListener);
+    
     checkFarcasterSession();
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('farcasterUserReady', handleUserReady as EventListener);
+    };
   }, []);
 
   const login = async () => {
