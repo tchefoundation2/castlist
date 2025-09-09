@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Page, Guide } from './types';
 import { useAuth, AuthProvider } from './hooks/useAuth';
-import { useFarcasterSDKSimple } from './hooks/useFarcasterSDKSimple';
 import { ThemeProvider } from './hooks/useTheme';
 import { DataProvider, useData } from './hooks/useData';
 import LoginPage from './pages/LoginPage';

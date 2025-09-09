@@ -1,66 +1,60 @@
-import React, { useEffect, useState } from 'react';
-import Loader from '../components/Loader';
+import React from 'react';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 const LoginPage: React.FC = () => {
-  const [isWebBrowser, setIsWebBrowser] = useState(false);
-
-  useEffect(() => {
-    // Check if we're in a web browser (not in Mini App)
-    const checkEnvironment = async () => {
-      if (window.farcaster) {
-        try {
-          const isInMiniApp = await window.farcaster.isInMiniApp();
-          setIsWebBrowser(!isInMiniApp);
-        } catch (e) {
-          // If we can't check, assume web browser
-          setIsWebBrowser(true);
-        }
-      } else {
-        // No SDK loaded, assume web browser
-        setIsWebBrowser(true);
-      }
-    };
-
-    checkEnvironment();
-  }, []);
+  const handleLogin = async () => {
+    try {
+      // Use Quick Auth to initiate authentication
+      const { token } = await sdk.quickAuth.getToken();
+      console.log("✅ Quick Auth token:", token);
+    } catch (error) {
+      console.error('Quick Auth failed:', error);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-gray-800 dark:text-gray-200 p-4 bg-gradient-to-br from-primary-50 via-purple-50 to-blue-100 bg-300% animate-gradient dark:from-gray-900 dark:via-gray-900 dark:to-black">
-      <div className="text-center animate-fadeIn w-full max-w-sm">
-        <h1 className="text-5xl font-bold text-gray-900 dark:text-gray-50 mb-3">
-          Castlist
-        </h1>
-        <h2 className="text-xl font-medium text-primary-700 dark:text-primary-400 mb-4">
-          Transform your Readings into a Social Journey
-        </h2>
-        <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-10 text-base">
-          The Castlist platform is your gateway to creating, sharing, and discovering curated lists within the Farcaster ecosystem.
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 flex flex-col items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Welcome to CastList
+          </h1>
+          <p className="text-xl text-purple-200 mb-8">
+            Connect with Farcaster to get started
+          </p>
+        </div>
         
-        {isWebBrowser ? (
-          <div className="mt-10 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div className="text-blue-600 dark:text-blue-400 mb-4">
-              <svg className="w-12 h-12 mx-auto mb-3" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 shadow-2xl">
+          <div className="text-center space-y-6">
+            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mx-auto flex items-center justify-center">
+              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0012 11z" clipRule="evenodd" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">
-              Open in Farcaster Mobile App
-            </h3>
-            <p className="text-sm text-blue-600 dark:text-blue-300 mb-4">
-              To use this Mini App, please open it in the Farcaster mobile app on your phone.
-            </p>
-            <div className="text-xs text-blue-500 dark:text-blue-400">
-              <p>• Open Farcaster app on your phone</p>
-              <p>• Search for "Castlist" or scan QR code</p>
-              <p>• Enjoy the full experience!</p>
+            
+            <div>
+              <h2 className="text-2xl font-semibold text-white mb-2">
+                Sign in with Farcaster
+              </h2>
+              <p className="text-purple-200">
+                Join the decentralized social network
+              </p>
+            </div>
+            
+            <button
+              onClick={handleLogin}
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 px-4 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
+            >
+              Connect Farcaster
+            </button>
+            
+            <div className="text-sm text-purple-200">
+              <p>
+                This will open Farcaster to authenticate your account
+              </p>
             </div>
           </div>
-        ) : (
-          <div className="mt-10">
-            <Loader text="Loading..." />
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

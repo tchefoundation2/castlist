@@ -2,22 +2,14 @@ import React, { createContext, useState, useContext, ReactNode, useEffect } from
 import { User } from '../types';
 import { getOrCreateUserProfile } from '../services/supabaseService';
 
+// Import the official Farcaster Miniapp SDK
+import { sdk } from '@farcaster/miniapp-sdk';
+
 // Define the Farcaster SDK type on the window object for TypeScript
 declare global {
   interface Window {
     // Mini App SDK v2 (inside Farcaster mobile/web app)
-    farcaster?: {
-      isInMiniApp: () => Promise<boolean>;
-      context: {
-        get: () => Promise<{ user?: { fid: number; username: string; pfp_url: string; } } | null>;
-      };
-      actions: {
-        ready: () => Promise<void>;
-      };
-      getCapabilities: () => Promise<string[]>;
-      getChains: () => Promise<any[]>;
-    };
-    farcasterUser?: { fid: number; username: string; pfp_url: string; };
+    farcaster?: typeof sdk;
   }
 }
 
@@ -38,82 +30,58 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Check for an existing Farcaster session when the app loads
   useEffect(() => {
-    const checkFarcasterSession = async () => {
-      console.log("🔍 Starting Farcaster v2 authentication...");
+    const authenticateWithQuickAuth = async () => {
+      console.log("🔍 Starting Farcaster v2 Quick Auth...");
       setIsLoading(true);
       
       try {
-        // Wait for SDK to load
-        let attempts = 0;
-        while (!window.farcaster && attempts < 10) {
-          console.log(`⏳ Waiting for SDK... attempt ${attempts + 1}`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          attempts++;
-        }
-        
-        if (!window.farcaster) {
-          console.warn("⚠️ Farcaster SDK not found after 10 seconds");
-          setIsLoading(false);
-          return;
-        }
-        
-        console.log("✅ Farcaster SDK found");
-        
         // Check if we're in a mini app
-        const isInMiniApp = await window.farcaster.isInMiniApp();
+        const isInMiniApp = await sdk.isInMiniApp();
         console.log("🔍 Is in Mini App:", isInMiniApp);
         
         if (isInMiniApp) {
           console.log("📱 Mini App environment detected");
           
-          // Check if user data is available from SDK
-          if (window.farcasterUser) {
-            console.log("✅ User data found from SDK:", window.farcasterUser);
+          try {
+            // Use Quick Auth to get authenticated user
+            const { token } = await sdk.quickAuth.getToken();
+            console.log("✅ Quick Auth token received");
             
-            // Create user profile
-            const profile = await getOrCreateUserProfile(window.farcasterUser);
-            setUser(profile);
-            console.log("✅ User authenticated successfully");
-          } else {
-            console.warn("⚠️ No user data available from SDK");
-            console.log("ℹ️ User may need to authenticate first");
+            // Get user context
+            const context = await sdk.context.get();
+            if (context?.user) {
+              const userData = context.user;
+              console.log("✅ User data from context:", userData);
+              
+              // Create user profile
+              const profile = await getOrCreateUserProfile(userData);
+              setUser(profile);
+              console.log("✅ User authenticated successfully");
+              
+              // Call ready when authenticated
+              await sdk.actions.ready();
+              console.log("✅ SDK ready called");
+            } else {
+              console.warn("⚠️ No user data in context");
+            }
+          } catch (authError) {
+            console.error("❌ Quick Auth error:", authError);
           }
         } else {
-          console.log("🌐 Web browser detected - QR code authentication needed");
-          console.log("ℹ️ User needs to scan QR code with Farcaster mobile app");
-          console.log("ℹ️ This is normal behavior for web browsers");
+          console.log("🌐 Web browser detected");
+          // For web browser, we'll use development mode
+          setIsLoading(false);
         }
         
       } catch (e) {
-        console.error("❌ Error in authentication check:", e);
+        console.error("❌ Error in Quick Auth:", e);
       } finally {
-        console.log("🔍 Authentication check complete");
+        console.log("🔍 Quick Auth check complete");
         setIsLoading(false);
       }
     };
     
-    // Listen for user ready event
-    const handleUserReady = async (event: CustomEvent) => {
-      console.log("🎉 User ready event received:", event.detail);
-      const userData = event.detail;
-      
-      try {
-        const profile = await getOrCreateUserProfile(userData);
-        setUser(profile);
-        console.log("✅ User authenticated successfully via event");
-      } catch (error) {
-        console.error("❌ Error creating user profile:", error);
-      }
-    };
-    
-    window.addEventListener('farcasterUserReady', handleUserReady as EventListener);
-    
-    checkFarcasterSession();
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener('farcasterUserReady', handleUserReady as EventListener);
-    };
+    authenticateWithQuickAuth();
   }, []);
 
   const login = async () => {
