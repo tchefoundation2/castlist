@@ -134,41 +134,11 @@ export const useFarcasterSDK = (useRealFarcaster: boolean = false): FarcasterSDK
       }
     };
 
-    // Function to inject Farcaster SDK
+    // Function to inject Farcaster SDK - DISABLED FOR TESTING
     const injectFarcasterSDK = () => {
-      if (window.farcaster) return; // Already exists
-      
-      console.log("🔄 Injecting mock Farcaster SDK for preview...");
-      
-      // Create a mock Farcaster SDK for preview
-      (window as any).farcaster = {
-        signIn: async () => {
-          console.log("🔐 Mock signIn called");
-          return {
-            fid: 12345,
-            username: "preview_user",
-            pfp_url: "https://via.placeholder.com/100x100/8A63D2/FFFFFF?text=P",
-            message: "Mock message",
-            signature: "mock_signature",
-            nonce: "mock_nonce"
-          };
-        },
-        getUser: async () => {
-          console.log("👤 Mock getUser called");
-          return {
-            fid: 12345,
-            username: "preview_user",
-            pfp_url: "https://via.placeholder.com/100x100/8A63D2/FFFFFF?text=P"
-          };
-        },
-        actions: {
-          ready: () => {
-            console.log("✅ Mock sdk.actions.ready() called");
-          }
-        }
-      };
-      
-      console.log("✅ Mock Farcaster SDK injected");
+      // DISABLED: No longer injecting mock SDK
+      console.log("🚫 Mock SDK injection disabled for testing");
+      return;
     };
 
     // Function to inject enhanced mock SDK for preview when real SDK fails

@@ -106,60 +106,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 window.farcaster.actions.ready();
                 console.log("✅ Called sdk.actions.ready() after manual auth");
               }
-            } else {
-              // If getUser() returns null, use mock user for preview
-              console.log("🔍 getUser() returned null, using mock user for preview");
-              const mockUser: User = {
-                id: 'preview-user-1',
-                fid: 12345,
-                username: 'preview_user',
-                pfp_url: 'https://via.placeholder.com/100x100/8A63D2/FFFFFF?text=P',
-                email: 'preview@example.com'
-              };
-              setUser(mockUser);
-              
-              // Call ready() even with mock user
-              if (window.farcaster.actions?.ready) {
-                window.farcaster.actions.ready();
-                console.log("✅ Called sdk.actions.ready() with mock user");
-              }
             }
           }
         } else {
-          // Development mode: use mock user for testing
-          console.warn("Farcaster SDK not found. Using development mode.");
-          const mockUser: User = {
-            id: 'dev-user-1',
-            fid: 1,
-            username: 'farcaster.eth',
-            pfp_url: 'https://i.imgur.com/34Iodlt.jpg',
-            email: 'dev@example.com'
-          };
-          setUser(mockUser);
-          
-          // Call ready() even in development mode if SDK is available
-          if (window.farcaster?.actions?.ready) {
-            window.farcaster.actions.ready();
-            console.log("✅ Called sdk.actions.ready() in development mode");
-          }
+          // No Farcaster SDK - show splash screen only
+          console.warn("Farcaster SDK not found. Showing splash screen only.");
         }
       } catch (e) {
         console.error("Error checking Farcaster session:", e);
-        // In case of error, use mock user for development
-        const mockUser: User = {
-          id: 'dev-user-1',
-          fid: 1,
-          username: 'farcaster.eth',
-          pfp_url: 'https://i.imgur.com/34Iodlt.jpg',
-          email: 'dev@example.com'
-        };
-        setUser(mockUser);
-        
-        // Call ready() even in error case if SDK is available
-        if (window.farcaster?.actions?.ready) {
-          window.farcaster.actions.ready();
-          console.log("✅ Called sdk.actions.ready() in error case");
-        }
       } finally {
         setIsLoading(false);
       }
