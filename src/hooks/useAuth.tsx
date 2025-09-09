@@ -54,11 +54,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       try {
         // Check if we're in a Farcaster mini app environment
-        const isMiniApp = window.farcaster && window.farcaster.actions && window.farcaster.actions.ready;
+        const isMiniApp = window.farcaster && (window.farcaster.actions || window.farcaster.quickAuth);
         
         console.log("🔍 Environment detection:");
         console.log("  - isMiniApp:", isMiniApp);
         console.log("  - window.farcaster:", !!window.farcaster);
+        console.log("  - window.farcaster.getUser:", typeof window.farcaster?.getUser);
+        console.log("  - window.farcaster.quickAuth:", !!window.farcaster?.quickAuth);
+        console.log("  - window.farcaster.actions:", !!window.farcaster?.actions);
         
         if (isMiniApp && window.farcaster) {
           console.log("📱 Mini App environment detected - using Quick Auth");
@@ -141,6 +144,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           // No Farcaster SDK - show splash screen only
           console.warn("Farcaster SDK not found. Showing splash screen only.");
         }
+        
+        // Add a timeout to prevent infinite loading
+        setTimeout(() => {
+          if (isLoading) {
+            console.warn("⚠️ Authentication timeout - stopping loading");
+            setIsLoading(false);
+          }
+        }, 10000); // 10 second timeout
       } catch (e) {
         console.error("Error checking Farcaster session:", e);
       } finally {
