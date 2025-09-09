@@ -55,39 +55,57 @@ const initializeFarcaster = async () => {
             }
             
             // Try to get user info via actions.signIn
-            if (sdk.actions && sdk.actions.signIn) {
-              console.log("🔍 Trying actions.signIn...");
-              try {
-                const signInResult = await sdk.actions.signIn({
-                  nonce: Math.random().toString(36).substring(2, 15),
-                  acceptAuthAddress: true
-                });
-                console.log("✅ SignIn result:", signInResult);
-                
-                // The signIn result doesn't contain user data directly
-                // We need to extract user info from the message or use a different approach
-                if (signInResult && signInResult.signature) {
-                  console.log("✅ Authentication successful, but no user data in signIn result");
-                  console.log("ℹ️ This is normal - user data comes from the token");
-                  
-                  // Try to get user info from the token or use a mock user for now
-                  // In a real implementation, you would decode the JWT token or make an API call
-                  const mockUser = {
-                    fid: 1183610, // Extract from the message if possible
-                    username: "user", // This would come from the Farcaster API
-                    pfp_url: "https://via.placeholder.com/150" // This would come from the Farcaster API
-                  };
-                  
-                  console.log("🔧 Using mock user data for now:", mockUser);
-                  window.farcasterUser = mockUser;
-                  
-                  // Trigger a custom event to notify the app that user is ready
-                  window.dispatchEvent(new CustomEvent('farcasterUserReady', { detail: mockUser }));
+                if (sdk.actions && sdk.actions.signIn) {
+                  console.log("🔍 Trying actions.signIn...");
+                  try {
+                    const signInResult = await sdk.actions.signIn({
+                      nonce: Math.random().toString(36).substring(2, 15),
+                      acceptAuthAddress: true
+                    });
+                    console.log("✅ SignIn result:", signInResult);
+                    
+                    // Check if signIn result contains user data
+                    if (signInResult && signInResult.user) {
+                      console.log("✅ User data found in signIn result:", signInResult.user);
+                      window.farcasterUser = signInResult.user;
+                      window.dispatchEvent(new CustomEvent('farcasterUserReady', { detail: signInResult.user }));
+                    } else if (signInResult && signInResult.signature) {
+                      console.log("✅ Authentication successful, but no user data in signIn result");
+                      console.log("ℹ️ This is normal - user data comes from the token");
+                      
+                      // Try to get user info from the token or use a mock user for now
+                      // In a real implementation, you would decode the JWT token or make an API call
+                      const mockUser = {
+                        fid: 1183610, // Extract from the message if possible
+                        username: "user", // This would come from the Farcaster API
+                        pfp_url: "https://via.placeholder.com/150" // This would come from the Farcaster API
+                      };
+                      
+                      console.log("🔧 Using mock user data for now:", mockUser);
+                      window.farcasterUser = mockUser;
+                      
+                      // Trigger a custom event to notify the app that user is ready
+                      window.dispatchEvent(new CustomEvent('farcasterUserReady', { detail: mockUser }));
+                    }
+                  } catch (signInError) {
+                    console.log("⚠️ SignIn failed:", signInError);
+                    
+                    // Fallback: try to get user from context
+                    try {
+                      console.log("🔍 Trying context.get() as fallback...");
+                      const context = await sdk.context.get();
+                      console.log("✅ Context result:", context);
+                      
+                      if (context && context.user) {
+                        console.log("✅ User data found in context:", context.user);
+                        window.farcasterUser = context.user;
+                        window.dispatchEvent(new CustomEvent('farcasterUserReady', { detail: context.user }));
+                      }
+                    } catch (contextError) {
+                      console.log("⚠️ Context.get() also failed:", contextError);
+                    }
+                  }
                 }
-              } catch (signInError) {
-                console.log("⚠️ SignIn failed:", signInError);
-              }
-            }
           } catch (e) {
             console.log("⚠️ Authentication failed:", e);
           }
