@@ -1,26 +1,105 @@
-# Castlist: Standalone Sandbox Mode
+# Castlist: Farcaster Miniapp v2 Compliance
 
-This directory contains the complete, self-contained `castlist` mini-application. It is designed as a "sandbox" that can be easily extracted and run as a standalone project.
+This directory contains the complete, self-contained `castlist` mini-application designed for **100% Farcaster Miniapp v2 compliance**.
 
-This ensures the application is decoupled, stable, and can be developed or deployed independently.
+## 🎯 Current Status: Refactoring for v2 Compliance
 
-## How to Run Standalone
+### **❌ Current Issues (Non-Compliant):**
+- Custom login buttons (not allowed in v2)
+- Manual authentication flow
+- Complex environment detection
+- Missing required meta tags
 
-To run the `castlist` app on its own (e.g., in a new repository or for isolated development), follow these simple steps:
+### **✅ Target Compliance:**
+- **Splash Screen Only:** No custom buttons, just loading
+- **Quick Auth:** Automatic authentication via `sdk.quickAuth.getToken()`
+- **Auto-Detection:** Simple miniapp environment detection
+- **Meta Tags:** Required `fc:miniapp` tags for embeds
 
-1.  **Create a New Project Folder:**
-    ```bash
-    mkdir castlist-standalone
-    cd castlist-standalone
-    ```
+## 📋 Required Screens for v2 Compliance
 
-2.  **Copy Contents:**
-    Copy **all** files and folders from this `app/castlist` directory into your new `castlist-standalone` folder. This includes the `metadata.json` file required by the platform.
+### **�� Mandatory Screens:**
+1. **Splash Screen** - Loading only, no buttons
+2. **Quick Auth** - Automatic authentication
+3. **Environment Detection** - `sdk.isInMiniApp()`
+4. **Back Navigation** - `sdk.back()`
 
-3.  **Rename Bootstrap Files:**
-    Inside your new folder, rename the bootstrap files to `index.html` and `index.tsx`:
-    -   Rename `standalone.html` to `index.html`
-    -   Rename `standalone.tsx` to `index.tsx`
+### **�� Optional Screens (Advanced Features):**
+5. **Cast Composition** - Create/publish casts
+6. **Wallet Integration** - Ethereum/Solana wallets
+7. **Notifications** - User re-engagement
 
-4.  **Done!**
-    The project is now a complete, runnable application. You can serve the `index.html` file with any static file server to see it in action.
+## �� Refactoring Plan
+
+### **Phase 1: Remove Custom Buttons**
+- [ ] Remove all "Sign in with Farcaster" buttons
+- [ ] Simplify LoginPage to splash screen only
+- [ ] Remove unnecessary auth components
+
+### **Phase 2: Implement Quick Auth**
+- [ ] Use `sdk.quickAuth.getToken()` for auto-authentication
+- [ ] Remove manual login logic
+- [ ] Keep only development fallback
+
+### **Phase 3: Add Meta Tags**
+- [ ] Implement `fc:miniapp` meta tags
+- [ ] Configure for shareable pages
+
+### **Phase 4: Compliance Testing**
+- [ ] Test in Farcaster Preview Tool
+- [ ] Verify "Ready not called" is resolved
+- [ ] Confirm automatic authentication
+
+## 📁 Files to Modify
+
+### **Core Files:**
+- `src/pages/LoginPage.tsx` - Simplify to splash screen
+- `src/App.tsx` - Simplify environment detection
+- `src/hooks/useAuth.tsx` - Implement Quick Auth
+- `src/components/SDKDebug.tsx` - Simplify debug panel
+
+### **Files to Remove:**
+- `src/components/OfficialFarcasterAuth.tsx`
+- `src/components/FarcasterAuthKit.tsx`
+- `src/components/FarcasterMiniAppAuth.tsx`
+- `src/components/DebugFarcasterAuth.tsx`
+- `src/components/SimpleFarcasterAuth.tsx`
+
+## 🛠️ How to Run
+
+### **Development:**
+```bash
+npm run dev
+```
+
+### **Build:**
+```bash
+npm run build
+```
+
+### **Deploy:**
+```bash
+# Deploy to Netlify/Vercel
+npm run build
+# Upload dist/ folder
+```
+
+## �� Documentation
+
+- [Farcaster Miniapp v2 Docs](https://miniapps.farcaster.xyz)
+- [Quick Auth Guide](https://miniapps.farcaster.xyz/docs/sdk/quick-auth)
+- [Loading Guide](https://miniapps.farcaster.xyz/docs/guides/loading)
+
+## 🎯 Goal
+
+Transform Castlist into a **100% compliant Farcaster Miniapp v2** with:
+- ✅ No custom login buttons
+- ✅ Automatic authentication
+- ✅ Proper splash screen
+- ✅ Required meta tags
+- ✅ Clean, maintainable code
+
+---
+
+**Current Branch:** `refactor/miniapp-v2-compliance`  
+**Target:** 100% Farcaster Miniapp v2 Compliance
