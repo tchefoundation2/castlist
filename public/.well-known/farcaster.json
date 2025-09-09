@@ -12,6 +12,7 @@
     "imageUrl": "https://castlisttest.vercel.app/farcaster-white.svg",
     "buttonTitle": "Open Castlist",
     "splashImageUrl": "https://castlisttest.vercel.app/farcaster-white.svg",
-    "splashBackgroundColor": "#8A63D2"
+    "splashBackgroundColor": "#8A63D2",
+    "webhookUrl": "https://castlisttest.vercel.app/api/webhook"
   }
 }
