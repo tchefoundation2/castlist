@@ -1,67 +1,29 @@
 import React, { useState } from 'react';
-import { GoogleGenAI, Type } from '@google/genai';
 import { Book } from '../types';
 import Button from '../components/Button';
-import Loader from '../components/Loader';
 
 interface GenerateBookPageProps {
   onBookGenerated: (book: Partial<Book>) => void;
 }
 
-interface GeneratedBook {
-  title: string;
-  author: string;
-  notes: string;
-}
-
 const GenerateBookPage: React.FC<GenerateBookPageProps> = ({ onBookGenerated }) => {
-  const [prompt, setPrompt] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<GeneratedBook[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
+  const [notes, setNotes] = useState('');
 
-  const handleGenerate = async () => {
-    if (!prompt) return;
-    setIsLoading(true);
-    setError(null);
-    setResults([]);
-
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: `Based on the following topic, suggest 5 book recommendations. For each book, provide a title, author, and a short note (one sentence) explaining why it fits the topic. Topic: "${prompt}"`,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                title: { type: Type.STRING },
-                author: { type: Type.STRING },
-                notes: { type: Type.STRING, description: "A short, one-sentence reason for recommending this book." }
-              },
-              required: ["title", "author", "notes"]
-            }
-          },
-        },
-      });
-      
-      const jsonStr = response.text?.trim() || '[]';
-      const recommendedBooks: GeneratedBook[] = JSON.parse(jsonStr);
-      setResults(recommendedBooks);
-
-    } catch (err) {
-      console.error("Error generating book recommendations:", err);
-      setError("Sorry, something went wrong while generating ideas. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleAddBook = (book: GeneratedBook) => {
-    onBookGenerated(book);
+  const handleAddBook = () => {
+    if (!title || !author) return;
+    
+    onBookGenerated({
+      title,
+      author,
+      notes: notes || undefined
+    });
+    
+    // Reset form
+    setTitle('');
+    setAuthor('');
+    setNotes('');
   };
   
   const labelStyles = "block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2";
@@ -70,45 +32,46 @@ const GenerateBookPage: React.FC<GenerateBookPageProps> = ({ onBookGenerated }) 
   return (
     <div className="space-y-4">
       <div>
-        <label htmlFor="prompt" className={labelStyles}>Describe the books you're looking for:</label>
-        <textarea
-          id="prompt"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          className={`${inputStyles} h-24`}
-          placeholder="e.g., 'Classic sci-fi books about space exploration'"
-          aria-label="Book recommendation prompt"
+        <label htmlFor="title" className={labelStyles}>Book Title:</label>
+        <input
+          id="title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className={inputStyles}
+          placeholder="Enter book title"
+          aria-label="Book title"
         />
       </div>
-      <Button onClick={handleGenerate} isLoading={isLoading} className="w-full">
-        Generate Ideas
+      
+      <div>
+        <label htmlFor="author" className={labelStyles}>Author:</label>
+        <input
+          id="author"
+          type="text"
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+          className={inputStyles}
+          placeholder="Enter author name"
+          aria-label="Author name"
+        />
+      </div>
+      
+      <div>
+        <label htmlFor="notes" className={labelStyles}>Notes (optional):</label>
+        <textarea
+          id="notes"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          className={`${inputStyles} h-24`}
+          placeholder="Add any notes about this book"
+          aria-label="Book notes"
+        />
+      </div>
+      
+      <Button onClick={handleAddBook} className="w-full">
+        Add Book
       </Button>
-
-      {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-
-      {isLoading && (
-        <div className="pt-4">
-            <Loader text="Generating..."/>
-        </div>
-      )}
-
-      {results.length > 0 && (
-        <div className="space-y-3 pt-4 max-h-64 overflow-y-auto pr-2">
-            <h3 className="text-md font-semibold text-gray-800 dark:text-gray-100">Suggestions:</h3>
-          {results.map((book, index) => (
-            <div key={index} className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl flex items-center justify-between gap-3">
-              <div className="flex-1">
-                <p className="font-bold text-gray-800 dark:text-gray-100">{book.title}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">by {book.author}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 italic">"{book.notes}"</p>
-              </div>
-              <Button onClick={() => handleAddBook(book)} variant="secondary" className="px-3 py-1.5 text-sm flex-shrink-0">
-                Add
-              </Button>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 };
