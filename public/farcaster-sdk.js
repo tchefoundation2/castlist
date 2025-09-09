@@ -1,7 +1,7 @@
-console.log("🚀 Farcaster SDK Helper - Real SDK Version");
+console.log("🚀 Farcaster SDK Helper - MiniApp SDK Version");
 
-// Import and initialize the real Farcaster SDK
-import { sdk } from "https://esm.sh/@farcaster/frame-sdk";
+// Import and initialize the real Farcaster MiniApp SDK
+import { sdk } from "https://esm.sh/@farcaster/miniapp-sdk";
 
 const initializeFarcaster = async () => {
   console.log("🔍 Environment check:");
@@ -12,7 +12,7 @@ const initializeFarcaster = async () => {
   
   try {
     // Initialize the real Farcaster SDK
-    console.log("🔧 Initializing real Farcaster SDK...");
+    console.log("🔧 Initializing real Farcaster MiniApp SDK...");
     
     // Check if we're in a Farcaster environment
     if (window !== window.top || document.referrer.includes('farcaster.xyz')) {
@@ -22,7 +22,7 @@ const initializeFarcaster = async () => {
       sdk.actions.ready();
       console.log("✅ Real Farcaster SDK ready() called successfully");
       
-      // Make SDK available globally
+      // Make SDK available globally with correct methods
       window.farcaster = {
         signIn: sdk.signIn,
         getUser: sdk.getUser,
@@ -30,6 +30,7 @@ const initializeFarcaster = async () => {
         quickAuth: sdk.quickAuth
       };
       console.log("✅ Farcaster SDK made available globally");
+      console.log("✅ Available methods:", Object.keys(window.farcaster));
     } else {
       console.log("ℹ️ Not in Farcaster environment - SDK not initialized");
     }
