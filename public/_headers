@@ -1,6 +1,9 @@
 /*
-  Content-Security-Policy: frame-ancestors 'self' https://farcaster.xyz https://*.farcaster.xyz https://warpcast.com https://*.warpcast.com https://client.warpcast.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://esm.sh https://explorer-api.walletconnect.com https://www.googletagmanager.com; connect-src 'self' https://*.farcaster.xyz https://*.warpcast.com https://explorer-api.walletconnect.com https://www.googletagmanager.com;
+  Content-Security-Policy: frame-ancestors 'self' https://farcaster.xyz https://*.farcaster.xyz https://warpcast.com https://*.warpcast.com https://client.warpcast.com https://wallet.farcaster.xyz; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://esm.sh https://explorer-api.walletconnect.com https://www.googletagmanager.com https://privy.farcaster.xyz; connect-src 'self' https://*.farcaster.xyz https://*.warpcast.com https://explorer-api.walletconnect.com https://www.googletagmanager.com https://privy.farcaster.xyz https://wallet.farcaster.xyz;
   Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+  Access-Control-Allow-Headers: X-Requested-With, Content-Type, Accept, Authorization
+  Access-Control-Allow-Credentials: true
 
 /.well-known/farcaster.json
   Content-Type: application/json

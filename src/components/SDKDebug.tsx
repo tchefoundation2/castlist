@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { sdk } from '@farcaster/miniapp-sdk';
+import { Page } from '../types';
 
-const SDKDebug: React.FC = () => {
+interface SDKDebugProps {
+  setPage?: (page: Page) => void;
+}
+
+const SDKDebug: React.FC<SDKDebugProps> = ({ setPage }) => {
   const { user, isAuthenticated } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [sdkStatus, setSdkStatus] = useState({
@@ -69,6 +74,18 @@ const SDKDebug: React.FC = () => {
               </>
             )}
           </div>
+          
+          {setPage && (
+            <div className="border-t border-gray-600 pt-1 mt-1">
+              <div className="font-bold text-purple-400">Test Pages:</div>
+              <button 
+                onClick={() => setPage(Page.FarcasterTest)}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded text-xs mt-1 w-full"
+              >
+                Open Farcaster Test Page
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

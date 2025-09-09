@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useFarcaster } from '../hooks/useFarcaster';
 import Button from './Button';
+import EthereumProviderTest from './EthereumProviderTest';
 
 const FarcasterTest: React.FC = () => {
   const {
@@ -231,6 +232,12 @@ const FarcasterTest: React.FC = () => {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Teste do Ethereum Provider */}
+      <div className="mt-8 p-4 border border-gray-300 rounded-lg">
+        <h2 className="text-xl font-bold mb-4">Teste do Ethereum Provider</h2>
+        <EthereumProviderTest />
       </div>
     </div>
   );

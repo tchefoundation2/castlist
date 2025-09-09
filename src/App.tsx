@@ -3,6 +3,7 @@ import { Page, Guide } from './types';
 import { useAuth, AuthProvider } from './hooks/useAuth';
 import { ThemeProvider } from './hooks/useTheme';
 import { DataProvider, useData } from './hooks/useData';
+import { useFarcasterSDKSimple } from './hooks/useFarcasterSDKSimple';
 import LoginPage from './pages/LoginPage';
 import MyGuidesPage from './pages/MyGuidesPage';
 import DiscoverPage from './pages/DiscoverPage';
@@ -155,7 +156,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="text-gray-800 dark:text-gray-200 min-h-screen font-sans bg-gradient-to-br from-primary-50 via-purple-50 to-blue-100 bg-300% animate-gradient dark:from-gray-900 dark:via-gray-900 dark:to-black">
-        <SDKDebug />
+        <SDKDebug setPage={handleSetPage} />
         <Header 
           page={page}
           onBack={handleBack}
