@@ -37,6 +37,10 @@
     {
       "source": "/.well-known/farcaster.json",
       "destination": "/farcaster.json"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
