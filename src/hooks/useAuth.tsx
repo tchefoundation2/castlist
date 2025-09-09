@@ -106,6 +106,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 window.farcaster.actions.ready();
                 console.log("✅ Called sdk.actions.ready() after manual auth");
               }
+            } else {
+              // If getUser() returns null, use mock user for preview
+              console.log("🔍 getUser() returned null, using mock user for preview");
+              const mockUser: User = {
+                id: 'preview-user-1',
+                fid: 12345,
+                username: 'preview_user',
+                pfp_url: 'https://via.placeholder.com/100x100/8A63D2/FFFFFF?text=P',
+                email: 'preview@example.com'
+              };
+              setUser(mockUser);
+              
+              // Call ready() even with mock user
+              if (window.farcaster.actions?.ready) {
+                window.farcaster.actions.ready();
+                console.log("✅ Called sdk.actions.ready() with mock user");
+              }
             }
           }
         } else {
